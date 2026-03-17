@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI/ML/Tech Skills Survey</title>
+<style>
+  :root {
+    --indigo: #4f46e5; --indigo-dark: #3730a3; --indigo-light: #eef2ff;
+    --purple: #7c3aed; --green: #059669; --red: #dc2626;
+    --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+    --gray-400: #9ca3af; --gray-500: #6b7280; --gray-700: #374151; --gray-800: #1f2937;
+    --white: #ffffff; --radius: 12px; --shadow: 0 4px 24px rgba(79,70,229,.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: linear-gradient(135deg,#0f0c29,#302b63,#24243e); min-height: 100vh; padding: 24px 16px 60px; color: var(--gray-800); }
+
+  /* ── HEADER ── */
+  .site-header { text-align: center; margin-bottom: 28px; }
+  .badge { display: inline-block; background: linear-gradient(90deg,var(--indigo),var(--purple)); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 4px 14px; border-radius: 99px; margin-bottom: 10px; }
+  .site-header h1 { color: #fff; font-size: clamp(20px,4vw,30px); font-weight: 800; }
+  .site-header p { color: #a5b4fc; font-size: 14px; margin-top: 4px; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { max-width: 780px; margin: 0 auto 20px; display: flex; align-items: center; gap: 4px; }
+  .prog-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .prog-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; transition: all .3s; background: #334155; color: #94a3b8; border: 2px solid #475569; }
+  .prog-circle.active { background: var(--indigo); color: #fff; border-color: #818cf8; box-shadow: 0 0 0 4px rgba(99,102,241,.3); }
+  .prog-circle.done { background: var(--green); color: #fff; border-color: var(--green); }
+  .prog-label { font-size: 10px; color: #94a3b8; margin-top: 4px; text-align: center; display: none; }
+  @media(min-width:480px){ .prog-label { display: block; } }
+  .prog-line { flex: 1; height: 2px; background: #334155; margin-bottom: 16px; transition: background .3s; }
+  .prog-line.done { background: var(--green); }
+
+  /* ── CARD ── */
+  .card { background: var(--white); border-radius: 20px; box-shadow: var(--shadow); max-width: 780px; margin: 0 auto; padding: clamp(20px,4vw,40px); }
+  .section-title { font-size: 20px; font-weight: 800; color: var(--gray-800); margin-bottom: 4px; }
+  .section-sub { font-size: 13px; color: var(--gray-500); margin-bottom: 24px; line-height: 1.5; }
+
+  /* ── FORM ELEMENTS ── */
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+  .field label .req { color: var(--red); margin-left: 2px; }
+  .field select, .field textarea, .field input[type=text] {
+    width: 100%; border: 1.5px solid var(--gray-200); border-radius: 8px;
+    padding: 10px 12px; font-size: 14px; color: var(--gray-800);
+    background: var(--gray-50); transition: border .2s, box-shadow .2s; outline: none;
+  }
+  .field select:focus, .field textarea:focus, .field input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(79,70,229,.1); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:540px){ .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── TAG CHIPS ── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 600; border: 2px solid var(--gray-200); background: var(--white); color: var(--gray-600); cursor: pointer; transition: all .18s; user-select: none; }
+  .chip:hover { border-color: var(--indigo); color: var(--indigo); }
+  .chip.selected { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .chip.selected:hover { background: var(--indigo-dark); }
+
+  /* ── SKILL GRID ── */
+  .skill-cat-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .skill-tab { padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--gray-200); background: var(--gray-50); color: var(--gray-600); cursor: pointer; transition: all .18s; }
+  .skill-tab.active { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .skill-panel { display: none; }
+  .skill-panel.active { display: block; }
+  .skill-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1.5px solid var(--gray-200); background: var(--gray-50); transition: all .18s; }
+  .skill-row.selected { border-color: #a5b4fc; background: var(--indigo-light); }
+  .skill-name { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-700); cursor: pointer; flex: 1; }
+  .skill-checkbox { width: 16px; height: 16px; border: 2px solid var(--gray-400); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .18s; }
+  .skill-checkbox.checked { background: var(--indigo); border-color: var(--indigo); }
+  .skill-checkbox.checked::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+  .proficiency { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity .18s; }
+  .skill-row.selected .proficiency { opacity: 1; pointer-events: auto; }
+  .prof-btn { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .prof-btn:hover { border-color: var(--indigo); color: var(--indigo); }
+  .prof-btn.p1.sel { background: #fef08a; border-color: #ca8a04; color: #713f12; }
+  .prof-btn.p2.sel { background: #bfdbfe; border-color: #2563eb; color: #1e40af; }
+  .prof-btn.p3.sel { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .prof-btn.p4.sel { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .skill-counter { font-size: 12px; color: var(--gray-400); margin-bottom: 12px; }
+  .skill-counter span { font-weight: 700; color: var(--indigo); }
+
+  /* ── LIKERT ── */
+  .likert-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .likert-table thead th { padding: 8px 4px; text-align: center; color: var(--gray-500); font-size: 11px; font-weight: 600; border-bottom: 1.5px solid var(--gray-200); }
+  .likert-table thead th:first-child { text-align: left; }
+  .likert-table tbody tr { border-bottom: 1px solid var(--gray-100); }
+  .likert-table tbody tr:last-child { border-bottom: none; }
+  .likert-table tbody td { padding: 10px 4px; text-align: center; vertical-align: middle; }
+  .likert-table tbody td:first-child { text-align: left; color: var(--gray-700); padding-left: 0; line-height: 1.4; }
+  .likert-table tbody tr:hover { background: var(--gray-50); }
+  .likert-radio { width: 20px; height: 20px; border: 2px solid var(--gray-300); border-radius: 50%; cursor: pointer; transition: all .15s; display: inline-block; position: relative; }
+  .likert-radio:hover { border-color: var(--indigo); }
+  .likert-radio.selected { background: var(--indigo); border-color: var(--indigo); }
+  .likert-radio.selected::after { content: ''; width: 8px; height: 8px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  @media(max-width:600px){
+    .likert-table thead th:first-child { display: none; }
+    .likert-table tbody td:first-child { display: block; padding-bottom: 6px; font-weight: 600; }
+    .likert-table, .likert-table tbody, .likert-table tr, .likert-table td { display: block; }
+    .likert-table tr { margin-bottom: 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 10px; }
+    .likert-table .likert-scale-row { display: flex; justify-content: space-around; }
+    .likert-table thead { display: none; }
+  }
+
+  /* ── STEP VISIBILITY ── */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* ── NAVIGATION ── */
+  .nav { display: flex; gap: 12px; margin-top: 28px; }
+  .btn { flex: 1; padding: 13px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; transition: all .2s; }
+  .btn-back { background: var(--white); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+  .btn-back:hover { background: var(--gray-100); }
+  .btn-next { background: linear-gradient(90deg, var(--indigo), var(--purple)); color: #fff; box-shadow: 0 4px 14px rgba(79,70,229,.3); }
+  .btn-next:hover { box-shadow: 0 6px 20px rgba(79,70,229,.4); transform: translateY(-1px); }
+  .btn-next:active { transform: translateY(0); }
+  .btn-submit { background: linear-gradient(90deg, var(--green), #10b981); color: #fff; box-shadow: 0 4px 14px rgba(5,150,105,.3); }
+  .btn-submit:hover { box-shadow: 0 6px 20px rgba(5,150,105,.4); transform: translateY(-1px); }
+
+  /* ── COMPLETION ── */
+  .done-icon { font-size: 56px; text-align: center; margin-bottom: 12px; }
+  .done-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 12px; margin: 20px 0; }
+  .done-stat { background: linear-gradient(135deg, var(--indigo-light), #f5f3ff); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #c7d2fe; }
+  .done-stat .num { font-size: 28px; font-weight: 800; color: var(--indigo); }
+  .done-stat .lbl { font-size: 12px; font-weight: 600; color: var(--gray-700); margin-top: 2px; }
+  .done-stat .sub { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+  .methods-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+  @media(max-width:480px){ .methods-grid { grid-template-columns: 1fr; } }
+  .method-card { background: var(--gray-50); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--gray-200); font-size: 12px; color: var(--gray-700); }
+  .method-card strong { color: var(--indigo); display: block; margin-bottom: 2px; font-size: 13px; }
+
+  /* ── MISC ── */
+  .info-box { background: linear-gradient(135deg, var(--indigo-light), #f5f3ff); border-left: 4px solid var(--indigo); border-radius: 8px; padding: 14px 16px; font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 20px; }
+  .intro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .intro-card { background: var(--gray-50); border-radius: 12px; padding: 14px 10px; text-align: center; border: 1px solid var(--gray-200); }
+  .intro-card .ico { font-size: 24px; margin-bottom: 6px; }
+  .intro-card .ttl { font-size: 12px; font-weight: 700; color: var(--gray-800); }
+  .intro-card .dsc { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+  .error-msg { color: var(--red); font-size: 12px; margin-top: 6px; display: none; }
+  hr.divider { border: none; border-top: 1.5px solid var(--gray-100); margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="badge">AI Careers Research</div>
+  <h1>AI/ML/Tech Skills Survey</h1>
+  <p>Help us build better tools to match people with the right AI opportunities</p>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="prog-step">
+    <div class="prog-circle active" id="pc0">1</div>
+    <div class="prog-label">Intro</div>
+  </div>
+  <div class="prog-line" id="pl0"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc1">2</div>
+    <div class="prog-label">Profile</div>
+  </div>
+  <div class="prog-line" id="pl1"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc2">3</div>
+    <div class="prog-label">Skills</div>
+  </div>
+  <div class="prog-line" id="pl2"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc3">4</div>
+    <div class="prog-label">Preferences</div>
+  </div>
+  <div class="prog-line" id="pl3"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc4">5</div>
+    <div class="prog-label">Experience</div>
+  </div>
+  <div class="prog-line" id="pl4"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc5">6</div>
+    <div class="prog-label">Context</div>
+  </div>
+  <div class="prog-line" id="pl5"></div>
+  <div class="prog-step">
+    <div class="prog-circle" id="pc6">7</div>
+    <div class="prog-label">Done</div>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- ══ STEP 0: INTRO ══════════════════════════════════════════════════════ -->
+  <div class="step active" id="step0">
+    <div class="section-title">Welcome! 👋</div>
+    <div class="section-sub">AI Career Opportunities Survey — Help us build smarter job matching for everyone in AI</div>
+
+    <div class="info-box" style="background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-left-color:#059669;margin-bottom:14px">
+      <strong style="color:#065f46">Why this matters:</strong>
+      <ul style="margin-top:8px;padding-left:18px;line-height:2">
+        <li>Finding the right AI role is hard — most people apply broadly and hear nothing back</li>
+        <li>Your responses help build a smarter matching system that connects people to roles that actually fit their skills and goals</li>
+        <li>The dataset powers research that could benefit the entire AI job-seeking community</li>
+        <li>Results from this research will be shared publicly</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <strong>Goal:</strong> Build a dataset to design and evaluate AI job recommender systems as part of an ongoing research project.<br><br>
+      <strong>What makes this unique:</strong> Your skill ratings form a <em>person x skill x opportunity</em> tripartite graph enabling novel recommender systems research.<br><br>
+      <strong>Time:</strong> ~10 minutes &nbsp;|&nbsp; <strong>Privacy:</strong> Responses are fully anonymized. No personally identifiable information is collected unless you choose to provide your email at the end.
+    </div>
+
+    <div class="intro-grid">
+      <div class="intro-card"><div class="ico">👤</div><div class="ttl">Profile</div><div class="dsc">Academic background features</div></div>
+      <div class="intro-card"><div class="ico">🧠</div><div class="ttl">Skill Map</div><div class="dsc">Self-rated AI skills — core item space</div></div>
+      <div class="intro-card"><div class="ico">🎯</div><div class="ttl">Preferences</div><div class="dsc">Role, company &amp; location signals</div></div>
+      <div class="intro-card"><div class="ico">📁</div><div class="ttl">Experience</div><div class="dsc">Past roles &amp; projects</div></div>
+      <div class="intro-card"><div class="ico">🌐</div><div class="ttl">Context</div><div class="dsc">Career goals &amp; situational signals</div></div>
+      <div class="intro-card"><div class="ico">📊</div><div class="ttl">Dataset</div><div class="dsc">Enables 7+ RS techniques</div></div>
+    </div>
+    <div class="nav" style="margin-top:0">
+      <button class="btn btn-next" onclick="goTo(1)">Start Survey →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1: PROFILE ════════════════════════════════════════════════════ -->
+  <div class="step" id="step1">
+    <div class="section-title">Section 1: Academic Profile</div>
+    <div class="section-sub">User-side attributes for content-based and hybrid filtering models.</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Academic Year <span class="req">*</span></label>
+        <select id="q_year">
+          <option value="">Select…</option>
+          <option>Freshman</option><option>Sophomore</option><option>Junior</option><option>Senior</option>
+          <option>MS Year 1</option><option>MS Year 2</option><option>PhD Year 1–2</option><option>PhD Year 3+</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Degree Program <span class="req">*</span></label>
+        <select id="q_degree">
+          <option value="">Select…</option>
+          <option>BS</option><option>MS</option><option>PhD</option><option>MEng</option><option>MBA+Tech</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Major / Primary Field <span class="req">*</span></label>
+        <select id="q_major">
+          <option value="">Select…</option>
+          <option>Computer Science</option><option>Data Science</option><option>Electrical & Computer Engineering</option>
+          <option>Statistics / Math</option><option>Cognitive Science</option><option>Robotics</option>
+          <option>Bioinformatics</option><option>Information Systems</option><option>Other STEM</option><option>Non-STEM</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>GPA Range <span class="req">*</span></label>
+        <select id="q_gpa">
+          <option value="">Select…</option>
+          <option>< 3.0</option><option>3.0–3.4</option><option>3.5–3.7</option><option>3.8–4.0</option><option>Not Applicable</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Research Experience <span class="req">*</span></label>
+        <select id="q_research">
+          <option value="">Select…</option>
+          <option>None</option><option>< 6 months</option><option>6–12 months</option><option>1–2 years</option><option>2+ years</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>5-Year Career Goal <span class="req">*</span></label>
+        <select id="q_goal">
+          <option value="">Select…</option>
+          <option>Industry ML / AI Engineer</option><option>Research Scientist (Industry)</option>
+          <option>AI Product Manager</option><option>Entrepreneur / Founder</option>
+          <option>Academia / PhD</option><option>AI Policy & Ethics</option><option>Undecided</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Relevant Coursework Completed <span style="color:var(--gray-400);font-weight:400">(select all that apply)</span></label>
+      <div class="chips" id="chips_courses">
+        <span class="chip" data-group="courses">Machine Learning</span>
+        <span class="chip" data-group="courses">Deep Learning</span>
+        <span class="chip" data-group="courses">NLP</span>
+        <span class="chip" data-group="courses">Computer Vision</span>
+        <span class="chip" data-group="courses">Reinforcement Learning</span>
+        <span class="chip" data-group="courses">Algorithms</span>
+        <span class="chip" data-group="courses">Linear Algebra</span>
+        <span class="chip" data-group="courses">Probability & Statistics</span>
+        <span class="chip" data-group="courses">Databases</span>
+        <span class="chip" data-group="courses">Distributed Systems</span>
+        <span class="chip" data-group="courses">AI Ethics</span>
+        <span class="chip" data-group="courses">Statistical Inference</span>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goTo(0)">← Back</button>
+      <button class="btn btn-next" onclick="validateAndGo(1,2)">Next: Skills →</button>
+    </div>
+    <div class="error-msg" id="err1">Please fill in all required fields (marked with *).</div>
+  </div>
+
+  <!-- ══ STEP 2: SKILLS ═════════════════════════════════════════════════════ -->
+  <div class="step" id="step2">
+    <div class="section-title">Section 2: AI Skill Map</div>
+    <div class="section-sub">Core item space of the dataset. Check skills you have, then rate your proficiency level.</div>
+    <div class="skill-counter">Selected: <span id="skillCount">0</span> skills &nbsp;|&nbsp; Rated: <span id="ratedCount">0</span> &nbsp;|&nbsp; Minimum 3 required</div>
+    <div class="skill-cat-tabs" id="skillTabs"></div>
+    <div id="skillPanels"></div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goTo(1)">← Back</button>
+      <button class="btn btn-next" onclick="validateAndGo(2,3)">Next: Preferences →</button>
+    </div>
+    <div class="error-msg" id="err2">Please select and rate at least 3 skills.</div>
+  </div>
+
+  <!-- ══ STEP 3: PREFERENCES ════════════════════════════════════════════════ -->
+  <div class="step" id="step3">
+    <div class="section-title">Section 3: Job &amp; Role Preferences</div>
+    <div class="section-sub">Explicit feedback signals for knowledge-based and hybrid recommender models.</div>
+
+    <div class="field">
+      <label>Target Roles <span class="req">*</span> <span style="color:var(--gray-400);font-weight:400">(up to 3)</span></label>
+      <div class="chips" id="chips_roles">
+        <span class="chip" data-group="roles" data-max="3">ML Engineer</span>
+        <span class="chip" data-group="roles" data-max="3">Research Scientist</span>
+        <span class="chip" data-group="roles" data-max="3">Data Scientist</span>
+        <span class="chip" data-group="roles" data-max="3">AI Product Manager</span>
+        <span class="chip" data-group="roles" data-max="3">MLOps / Platform Engineer</span>
+        <span class="chip" data-group="roles" data-max="3">AI Safety Researcher</span>
+        <span class="chip" data-group="roles" data-max="3">Applied AI Engineer</span>
+        <span class="chip" data-group="roles" data-max="3">Computer Vision Engineer</span>
+        <span class="chip" data-group="roles" data-max="3">NLP Engineer</span>
+        <span class="chip" data-group="roles" data-max="3">AI Hardware / Systems Engineer</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Preferred Company / Organization Types <span class="req">*</span></label>
+      <div class="chips" id="chips_companies">
+        <span class="chip" data-group="companies">AI Research Lab (OpenAI, Anthropic, DeepMind)</span>
+        <span class="chip" data-group="companies">Big Tech AI (Google, Microsoft, Apple, Amazon)</span>
+        <span class="chip" data-group="companies">AI-Focused Startup (&lt;200 employees)</span>
+        <span class="chip" data-group="companies">MLOps / Data Platform (Databricks, Scale AI)</span>
+        <span class="chip" data-group="companies">Hardware & AI (NVIDIA, Intel)</span>
+        <span class="chip" data-group="companies">Government / National Lab</span>
+        <span class="chip" data-group="companies">University Research Lab</span>
+        <span class="chip" data-group="companies">Healthcare / Biotech AI</span>
+        <span class="chip" data-group="companies">Finance / Quant AI</span>
+        <span class="chip" data-group="companies">Open to Any</span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Work Style</label>
+        <div class="chips">
+          <span class="chip" data-group="workstyle">Remote</span>
+          <span class="chip" data-group="workstyle">Hybrid</span>
+          <span class="chip" data-group="workstyle">On-site</span>
+          <span class="chip" data-group="workstyle">Flexible</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Preferred Duration</label>
+        <div class="chips">
+          <span class="chip" data-group="duration">3 months</span>
+          <span class="chip" data-group="duration">4 months</span>
+          <span class="chip" data-group="duration">6 months</span>
+          <span class="chip" data-group="duration">Co-op (8–12 mo)</span>
+          <span class="chip" data-group="duration">Part-time</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Preferred Locations</label>
+      <div class="chips">
+        <span class="chip" data-group="location">Bay Area, CA</span>
+        <span class="chip" data-group="location">NYC, NY</span>
+        <span class="chip" data-group="location">Seattle, WA</span>
+        <span class="chip" data-group="location">Boston, MA</span>
+        <span class="chip" data-group="location">Austin, TX</span>
+        <span class="chip" data-group="location">Los Angeles, CA</span>
+        <span class="chip" data-group="location">London, UK</span>
+        <span class="chip" data-group="location">Toronto, Canada</span>
+        <span class="chip" data-group="location">Remote (US)</span>
+        <span class="chip" data-group="location">Remote (Global)</span>
+        <span class="chip" data-group="location">Open to Anywhere</span>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goTo(2)">← Back</button>
+      <button class="btn btn-next" onclick="validateAndGo(3,4)">Next: Experience →</button>
+    </div>
+    <div class="error-msg" id="err3">Please select at least one role and one company type.</div>
+  </div>
+
+  <!-- ══ STEP 4: EXPERIENCE ═════════════════════════════════════════════════ -->
+  <div class="step" id="step4">
+    <div class="section-title">Section 4: Past Experience</div>
+    <div class="section-sub">Sequential signals for temporal and career-trajectory recommender models.</div>
+
+    <div class="field">
+      <label>Previous Roles / Experience</label>
+      <div class="chips">
+        <span class="chip" data-group="past_intern">AI/ML Role (Industry)</span>
+        <span class="chip" data-group="past_intern">Software Engineering Internship</span>
+        <span class="chip" data-group="past_intern">Data Science Internship</span>
+        <span class="chip" data-group="past_intern">Research Assistant (University)</span>
+        <span class="chip" data-group="past_intern">Industry Research Intern</span>
+        <span class="chip" data-group="past_intern">Open Source Contributor</span>
+        <span class="chip" data-group="past_intern">Kaggle / Hackathon</span>
+        <span class="chip" data-group="past_intern">Teaching Assistant</span>
+        <span class="chip" data-group="past_intern">Startup Founder</span>
+        <span class="chip" data-group="past_intern">None yet</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>AI Project Types Built</label>
+      <div class="chips">
+        <span class="chip" data-group="projects">LLM Application / Chatbot</span>
+        <span class="chip" data-group="projects">Computer Vision System</span>
+        <span class="chip" data-group="projects">Recommendation System</span>
+        <span class="chip" data-group="projects">Data Pipeline / ETL</span>
+        <span class="chip" data-group="projects">AI Agent</span>
+        <span class="chip" data-group="projects">Research Replication</span>
+        <span class="chip" data-group="projects">Kaggle Competition</span>
+        <span class="chip" data-group="projects">Mobile AI App</span>
+        <span class="chip" data-group="projects">Game-Playing AI</span>
+        <span class="chip" data-group="projects">Robotics / Embodied AI</span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Publications / Preprints</label>
+        <div class="chips">
+          <span class="chip" data-group="pubs" data-single="true">None</span>
+          <span class="chip" data-group="pubs" data-single="true">1</span>
+          <span class="chip" data-group="pubs" data-single="true">2–3</span>
+          <span class="chip" data-group="pubs" data-single="true">4+</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>How did you find your last opportunity?</label>
+        <div class="chips">
+          <span class="chip" data-group="source" data-single="true">LinkedIn</span>
+          <span class="chip" data-group="source" data-single="true">Company Website</span>
+          <span class="chip" data-group="source" data-single="true">Campus Recruiting</span>
+          <span class="chip" data-group="source" data-single="true">Referral</span>
+          <span class="chip" data-group="source" data-single="true">Cold Email</span>
+          <span class="chip" data-group="source" data-single="true">Research Advisor</span>
+          <span class="chip" data-group="source" data-single="true">Hackathon</span>
+          <span class="chip" data-group="source" data-single="true">GitHub Profile</span>
+          <span class="chip" data-group="source" data-single="true">N/A</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-back" onclick="goTo(3)">← Back</button>
+      <button class="btn btn-next" onclick="goTo(5)">Next: Context →</button>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5: CONTEXT ════════════════════════════════════════════════════ -->
+  <div class="step" id="step5">
+    <div class="section-title">Section 5: Context &amp; Career Goals</div>
+    <div class="section-sub">Enables context-aware RS models. Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree).</div>
+
+    <div style="overflow-x:auto">
+    <table class="likert-table">
+      <thead>
+        <tr>
+          <th style="width:52%">Statement</th>
+          <th>1<br><span style="font-weight:400;font-size:10px">Str. Disagree</span></th>
+          <th>2</th><th>3<br><span style="font-weight:400;font-size:10px">Neutral</span></th><th>4</th>
+          <th>5<br><span style="font-weight:400;font-size:10px">Str. Agree</span></th>
+        </tr>
+      </thead>
+      <tbody id="likertBody"></tbody>
+    </table>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="field">
+      <label>Target Job / Opportunity Timeline <span class="req">*</span></label>
+      <div class="chips">
+        <span class="chip" data-group="timeline" data-single="true">Summer 2025</span>
+        <span class="chip" data-group="timeline" data-single="true">Fall 2025</span>
+        <span class="chip" data-group="timeline" data-single="true">Spring 2026</span>
+        <span class="chip" data-group="timeline" data-single="true">Summer 2026</span>
+        <span class="chip" data-group="timeline" data-single="true">Flexible</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Biggest barrier to finding an AI job or opportunity?</label>
+      <div class="chips">
+        <span class="chip" data-group="barrier" data-single="true">Skill gaps</span>
+        <span class="chip" data-group="barrier" data-single="true">No network / referrals</span>
+        <span class="chip" data-group="barrier" data-single="true">GPA requirements</span>
+        <span class="chip" data-group="barrier" data-single="true">Visa / work auth</span>
+        <span class="chip" data-group="barrier" data-single="true">Interview prep</span>
+        <span class="chip" data-group="barrier" data-single="true">Too competitive</span>
+        <span class="chip" data-group="barrier" data-single="true">Weak portfolio</span>
+        <span class="chip" data-group="barrier" data-single="true">Unclear what to apply for</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How useful would an AI-powered job recommender be for you? <span class="req">*</span></label>
+      <select id="q_useful">
+        <option value="">Select…</option>
+        <option>Extremely useful – I struggle to find the right opportunities</option>
+        <option>Very useful – I'd use it regularly</option>
+        <option>Somewhat useful – a nice addition to my search</option>
+        <option>Not very useful – I have good strategies already</option>
+        <option>Not useful at all</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Describe your ideal AI role <span style="color:var(--gray-400);font-weight:400">(optional, 1–3 sentences)</span></label>
+      <textarea id="q_ideal" placeholder="e.g. A role at an AI safety lab in the Bay Area, working on LLM evaluation with strong mentorship from senior researchers…"></textarea>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="info-box" style="background:#fffbeb;border-left-color:#d97706">
+      <strong>Want to receive the research findings?</strong><br>
+      This survey is fully anonymous. If you'd like to be notified when the research results are published, you can optionally leave your email below. Your email is stored separately from your survey responses and will not be linked to your answers.
+    </div>
+    <div class="field">
+      <label>Email Address <span style="color:var(--gray-400);font-weight:400">(optional)</span></label>
+      <input type="text" id="q_email" placeholder="you@example.com" />
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-back" onclick="goTo(4)">← Back</button>
+      <button class="btn btn-submit" onclick="submitSurvey()">Submit Survey ✓</button>
+    </div>
+    <div class="error-msg" id="err5">Please complete the required fields (timeline and usefulness rating).</div>
+  </div>
+
+  <!-- ══ STEP 6: DONE ════════════════════════════════════════════════════════ -->
+  <div class="step" id="step6">
+    <div class="done-icon">🎓</div>
+    <div class="section-title" style="text-align:center">Submission Complete!</div>
+    <div class="section-sub" style="text-align:center">Your response contributes to a novel AI careers recommender systems dataset. Thank you for helping make AI job matching better for everyone.</div>
+    <div class="done-grid">
+      <div class="done-stat"><div class="num" id="dn_profile">—</div><div class="lbl">Profile Attrs</div><div class="sub">User node features</div></div>
+      <div class="done-stat"><div class="num" id="dn_skills">—</div><div class="lbl">Skills Mapped</div><div class="sub">Item interaction data</div></div>
+      <div class="done-stat"><div class="num" id="dn_prefs">—</div><div class="lbl">Preferences</div><div class="sub">Explicit feedback</div></div>
+      <div class="done-stat"><div class="num" id="dn_ctx">—</div><div class="lbl">Context Signals</div><div class="sub">Situational features</div></div>
+    </div>
+    <div style="background:var(--gray-50);border-radius:12px;padding:16px;border:1px solid var(--gray-200)">
+      <div style="font-size:14px;font-weight:700;color:var(--gray-800);margin-bottom:12px">🔬 RS Techniques Enabled by Your Data</div>
+      <div class="methods-grid">
+        <div class="method-card"><strong>🤝 Collaborative Filtering</strong>Skill & preference similarity across students</div>
+        <div class="method-card"><strong>📄 Content-Based Filtering</strong>Profile + item feature vector matching</div>
+        <div class="method-card"><strong>🌐 Graph Neural Networks</strong>Student–Skill–Company tripartite graph</div>
+        <div class="method-card"><strong>🧠 LLM-Based RS</strong>Semantic embeddings + prompt-based ranking</div>
+        <div class="method-card"><strong>📍 Context-Aware RS</strong>Career goals & situational Likert signals</div>
+        <div class="method-card"><strong>⏱ Sequential RS</strong>Career trajectory progression modeling</div>
+        <div class="method-card"><strong>❄️ Cold-Start Research</strong>New students with few skill ratings</div>
+        <div class="method-card"><strong>🔁 Hybrid Models</strong>Fusion of all above approaches</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const SKILL_CATS = {
+  "ML & Deep Learning": ["Supervised Learning","Unsupervised Learning","Reinforcement Learning","Neural Networks","CNNs","RNNs / LSTMs","Transformers","GANs","Diffusion Models","Graph Neural Networks"],
+  "NLP & LLMs": ["Text Classification","Named Entity Recognition","Sentiment Analysis","LLM Fine-tuning","Prompt Engineering","RAG","Embeddings","RLHF","LangChain / LlamaIndex","Vector Databases"],
+  "MLOps & Infra": ["Docker","Kubernetes","CI/CD for ML","MLflow","Weights & Biases","AWS SageMaker","GCP Vertex AI","Azure ML","Model Serving","Feature Stores"],
+  "Programming": ["Python","C++","Java","Julia","R","SQL","Bash / Linux","CUDA","JavaScript","Scala"],
+  "Frameworks": ["PyTorch","TensorFlow","JAX","HuggingFace","Scikit-learn","Pandas / NumPy","Apache Spark","Airflow","FastAPI","Streamlit / Gradio"],
+  "Math & Theory": ["Linear Algebra","Probability & Stats","Optimization","Information Theory","Bayesian Methods","Causal Inference","Convex Optimization","Signal Processing"],
+  "Domain AI": ["Computer Vision","Speech & Audio AI","Robotics & Control","Bioinformatics AI","AI for Healthcare","AI for Finance","Autonomous Vehicles","AI Safety & Alignment"],
+  "Research": ["Paper Reading","Literature Review","Experiment Design","Academic Writing","Conference Talks","Open-Source Contributions","Patent Writing"]
+};
+
+const LIKERT_STATEMENTS = [
+  "I want internships that help me learn skills I don't yet have",
+  "Company brand / prestige matters more to me than exact role fit",
+  "Compensation is my top priority when choosing an internship",
+  "Strong mentorship is more important to me than project scope",
+  "I prefer internships with publication or research output opportunities",
+  "I am actively seeking a return full-time offer from this internship",
+  "Team diversity and inclusive culture are highly important to me",
+  "I am comfortable with uncertainty at an early-stage startup"
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let skillState = {}; // { skillName: proficiency 0=unchecked, 1-4=level }
+let likertState = {}; // { idx: 1-5 }
+let currentStep = 0;
+const TOTAL = 7;
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function buildSkills() {
+  const tabs = document.getElementById('skillTabs');
+  const panels = document.getElementById('skillPanels');
+  Object.entries(SKILL_CATS).forEach(([cat, skills], ci) => {
+    // Tab
+    const tab = document.createElement('button');
+    tab.className = 'skill-tab' + (ci===0?' active':'');
+    tab.textContent = cat;
+    tab.onclick = () => switchCat(cat);
+    tab.dataset.cat = cat;
+    tabs.appendChild(tab);
+
+    // Panel
+    const panel = document.createElement('div');
+    panel.className = 'skill-panel' + (ci===0?' active':'');
+    panel.id = 'panel_' + ci;
+    panel.dataset.cat = cat;
+
+    skills.forEach(skill => {
+      const row = document.createElement('div');
+      row.className = 'skill-row';
+      row.id = 'row_' + skill.replace(/\s+/g,'_');
+      row.innerHTML = `
+        <div class="skill-name" onclick="toggleSkill('${skill.replace(/'/g,"\\'")}')">
+          <div class="skill-checkbox" id="cb_${skill.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'_')}"></div>
+          ${skill}
+        </div>
+        <div class="proficiency">
+          <button class="prof-btn p1" onclick="setProf('${skill.replace(/'/g,"\\'")}',1,this)">Beginner</button>
+          <button class="prof-btn p2" onclick="setProf('${skill.replace(/'/g,"\\'")}',2,this)">Intermediate</button>
+          <button class="prof-btn p3" onclick="setProf('${skill.replace(/'/g,"\\'")}',3,this)">Advanced</button>
+          <button class="prof-btn p4" onclick="setProf('${skill.replace(/'/g,"\\'")}',4,this)">Expert</button>
+        </div>`;
+      panel.appendChild(row);
+    });
+    panels.appendChild(panel);
+  });
+}
+
+function buildLikert() {
+  const tbody = document.getElementById('likertBody');
+  LIKERT_STATEMENTS.forEach((stmt, i) => {
+    const tr = document.createElement('tr');
+    let cells = `<td>${stmt}</td>`;
+    for (let v=1; v<=5; v++) {
+      cells += `<td><div class="likert-radio" id="lr_${i}_${v}" onclick="setLikert(${i},${v})"></div></td>`;
+    }
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+}
+
+function switchCat(cat) {
+  document.querySelectorAll('.skill-tab').forEach(t => t.classList.toggle('active', t.dataset.cat===cat));
+  document.querySelectorAll('.skill-panel').forEach(p => p.classList.toggle('active', p.dataset.cat===cat));
+}
+
+// ── SKILL LOGIC ───────────────────────────────────────────────────────────────
+function toggleSkill(skill) {
+  const id = 'row_' + skill.replace(/\s+/g,'_');
+  const cbId = 'cb_' + skill.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'_');
+  const row = document.getElementById(id);
+  const cb = document.getElementById(cbId);
+  if (!row || !cb) return;
+  const isChecked = cb.classList.contains('checked');
+  if (isChecked) {
+    cb.classList.remove('checked');
+    row.classList.remove('selected');
+    delete skillState[skill];
+  } else {
+    cb.classList.add('checked');
+    row.classList.add('selected');
+    skillState[skill] = 0;
+  }
+  updateSkillCounter();
+}
+
+function setProf(skill, level, btn) {
+  skillState[skill] = level;
+  const row = btn.closest('.skill-row');
+  row.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateSkillCounter();
+}
+
+function updateSkillCounter() {
+  const sel = Object.keys(skillState).length;
+  const rated = Object.values(skillState).filter(v=>v>0).length;
+  document.getElementById('skillCount').textContent = sel;
+  document.getElementById('ratedCount').textContent = rated;
+}
+
+// ── LIKERT LOGIC ──────────────────────────────────────────────────────────────
+function setLikert(row, val) {
+  likertState[row] = val;
+  for (let v=1; v<=5; v++) {
+    const el = document.getElementById(`lr_${row}_${v}`);
+    if (el) el.classList.toggle('selected', v===val);
+  }
+}
+
+// ── CHIP LOGIC ────────────────────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const group = chip.dataset.group;
+  const isSingle = chip.dataset.single === 'true';
+  const maxStr = chip.dataset.max;
+  const max = maxStr ? parseInt(maxStr) : Infinity;
+
+  if (isSingle) {
+    document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+  } else {
+    const already = chip.classList.contains('selected');
+    const selected = document.querySelectorAll(`.chip[data-group="${group}"].selected`).length;
+    if (!already && selected >= max) return;
+    chip.classList.toggle('selected');
+  }
+});
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goTo(n) {
+  document.getElementById('step'+currentStep).classList.remove('active');
+  document.getElementById('step'+n).classList.add('active');
+  // Progress circles
+  for (let i=0; i<TOTAL; i++) {
+    const el = document.getElementById('pc'+i);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done'), el.textContent='✓';
+    else if (i===n) el.classList.add('active'), el.textContent=i+1;
+    else el.textContent=i+1;
+    const line = document.getElementById('pl'+i);
+    if (line) line.classList.toggle('done', i < n);
+  }
+  currentStep = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (n===6) buildDone();
+}
+
+function validateAndGo(from, to) {
+  hideErr(from);
+  if (from===1) {
+    const required = ['q_year','q_degree','q_major','q_gpa','q_research','q_goal'];
+    if (required.some(id => !document.getElementById(id).value)) { showErr(1); return; }
+  }
+  if (from===2) {
+    const sel = Object.keys(skillState).length;
+    if (sel < 3) { showErr(2); return; }
+  }
+  if (from===3) {
+    const roles = document.querySelectorAll('.chip[data-group="roles"].selected').length;
+    const cos = document.querySelectorAll('.chip[data-group="companies"].selected').length;
+    if (!roles || !cos) { showErr(3); return; }
+  }
+  if (from===5) {
+    const timeline = document.querySelectorAll('.chip[data-group="timeline"].selected').length;
+    if (!timeline || !document.getElementById('q_useful').value) { showErr(5); return; }
+  }
+  goTo(to);
+}
+
+function showErr(n) { const e=document.getElementById('err'+n); if(e) e.style.display='block'; }
+function hideErr(n) { const e=document.getElementById('err'+n); if(e) e.style.display='none'; }
+
+// ── DONE STATS ────────────────────────────────────────────────────────────────
+function buildDone() {
+  const profileCount = ['q_year','q_degree','q_major','q_gpa','q_research','q_goal']
+    .filter(id => document.getElementById(id)?.value).length
+    + document.querySelectorAll('.chip[data-group="courses"].selected').length;
+  const skillCount = Object.keys(skillState).length;
+  const prefCount = ['roles','companies','workstyle','duration','location']
+    .reduce((s,g) => s + document.querySelectorAll(`.chip[data-group="${g}"].selected`).length, 0);
+  const ctxCount = Object.keys(likertState).length
+    + (document.querySelectorAll('.chip[data-group="timeline"].selected').length ? 1 : 0)
+    + (document.querySelectorAll('.chip[data-group="barrier"].selected').length ? 1 : 0);
+  document.getElementById('dn_profile').textContent = profileCount;
+  document.getElementById('dn_skills').textContent = skillCount;
+  document.getElementById('dn_prefs').textContent = prefCount;
+  document.getElementById('dn_ctx').textContent = ctxCount;
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitSurvey() {
+  hideErr(5);
+  const timeline = document.querySelectorAll('.chip[data-group="timeline"].selected').length;
+  if (!timeline || !document.getElementById('q_useful').value) { showErr(5); return; }
+
+  const getChips = (group) => [...document.querySelectorAll(`.chip[data-group="${group}"].selected`)].map(c => c.textContent.trim());
+
+  const payload = {
+    submitted_at: new Date().toISOString(),
+    profile: {
+      academic_year: document.getElementById('q_year').value,
+      degree: document.getElementById('q_degree').value,
+      major: document.getElementById('q_major').value,
+      gpa: document.getElementById('q_gpa').value,
+      research_experience: document.getElementById('q_research').value,
+      career_goal: document.getElementById('q_goal').value,
+      coursework: getChips('courses'),
+    },
+    skills: skillState,
+    preferences: {
+      roles: getChips('roles'),
+      companies: getChips('companies'),
+      work_style: getChips('workstyle'),
+      duration: getChips('duration'),
+      locations: getChips('location'),
+    },
+    experience: {
+      past_roles: getChips('past_intern'),
+      projects: getChips('projects'),
+      publications: getChips('pubs')[0] || null,
+      opportunity_source: getChips('source')[0] || null,
+    },
+    context: {
+      likert: likertState,
+      timeline: getChips('timeline')[0] || null,
+      barrier: getChips('barrier')[0] || null,
+      usefulness: document.getElementById('q_useful').value,
+      ideal_role: document.getElementById('q_ideal').value,
+    },
+    email: document.getElementById('q_email').value || null,
+  };
+
+  try {
+    const res = await fetch('http://localhost:8000/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      goTo(6);
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  } catch(e) {
+    alert('Could not connect to server. Please try again.');
+  }
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+buildSkills();
+buildLikert();
+</script>
+</body>
+</html>
