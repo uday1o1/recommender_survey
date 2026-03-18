@@ -64,13 +64,13 @@
   .skill-tab.active { background: var(--indigo); border-color: var(--indigo); color: #fff; }
   .skill-panel { display: none; }
   .skill-panel.active { display: block; }
-  .skill-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1.5px solid var(--gray-200); background: var(--gray-50); transition: all .18s; }
+  .skill-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1.5px solid var(--gray-200); background: var(--gray-50); transition: all .18s; flex-wrap: wrap; gap: 6px; }
   .skill-row.selected { border-color: #a5b4fc; background: var(--indigo-light); }
-  .skill-name { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-700); cursor: pointer; flex: 1; }
+  .skill-name { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-700); cursor: pointer; flex: 1; min-width: 120px; }
   .skill-checkbox { width: 16px; height: 16px; border: 2px solid var(--gray-400); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .18s; }
   .skill-checkbox.checked { background: var(--indigo); border-color: var(--indigo); }
   .skill-checkbox.checked::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
-  .proficiency { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity .18s; }
+  .proficiency { display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: opacity .18s; flex-wrap: wrap; }
   .skill-row.selected .proficiency { opacity: 1; pointer-events: auto; }
   .prof-btn { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; transition: all .15s; white-space: nowrap; }
   .prof-btn:hover { border-color: var(--indigo); color: var(--indigo); }
