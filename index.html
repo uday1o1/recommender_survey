@@ -95,12 +95,15 @@
   .likert-radio.selected { background: var(--indigo); border-color: var(--indigo); }
   .likert-radio.selected::after { content: ''; width: 8px; height: 8px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
   @media(max-width:600px){
-    .likert-table thead th:first-child { display: none; }
-    .likert-table tbody td:first-child { display: block; padding-bottom: 6px; font-weight: 600; }
-    .likert-table, .likert-table tbody, .likert-table tr, .likert-table td { display: block; }
-    .likert-table tr { margin-bottom: 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 10px; }
-    .likert-table .likert-scale-row { display: flex; justify-content: space-around; }
     .likert-table thead { display: none; }
+    .likert-table, .likert-table tbody { display: block; }
+    .likert-table tr { display: block; margin-bottom: 14px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 12px 10px; }
+    .likert-table td { display: none; }
+    .likert-table td:first-child { display: block; padding-bottom: 10px; font-weight: 600; color: var(--gray-700); }
+    .likert-table .likert-mobile-td { display: block !important; }
+    .likert-mobile-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+    .likert-mobile-item { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .likert-mobile-label { font-size: 9px; color: var(--gray-500); font-weight: 600; text-align: center; }
   }
 
   /* ── STEP VISIBILITY ── */
@@ -651,11 +654,22 @@ function buildLikert() {
   const tbody = document.getElementById('likertBody');
   LIKERT_STATEMENTS.forEach((stmt, i) => {
     const tr = document.createElement('tr');
+    const labels = ['Str. Disagree', '2', 'Neutral', '4', 'Str. Agree'];
     let cells = `<td>${stmt}</td>`;
     for (let v=1; v<=5; v++) {
       cells += `<td><div class="likert-radio" id="lr_${i}_${v}" onclick="setLikert(${i},${v})"></div></td>`;
     }
-    tr.innerHTML = cells;
+    // Mobile row with labels
+    let mobileRow = `<td colspan="5" style="display:none" class="likert-mobile-td">
+      <div class="likert-mobile-row">`;
+    for (let v=1; v<=5; v++) {
+      mobileRow += `<div class="likert-mobile-item">
+        <div class="likert-radio" id="lrm_${i}_${v}" onclick="setLikert(${i},${v})"></div>
+        <div class="likert-mobile-label">${labels[v-1]}</div>
+      </div>`;
+    }
+    mobileRow += `</div></td>`;
+    tr.innerHTML = cells + mobileRow;
     tbody.appendChild(tr);
   });
 }
@@ -705,7 +719,9 @@ function setLikert(row, val) {
   likertState[row] = val;
   for (let v=1; v<=5; v++) {
     const el = document.getElementById(`lr_${row}_${v}`);
+    const elm = document.getElementById(`lrm_${row}_${v}`);
     if (el) el.classList.toggle('selected', v===val);
+    if (elm) elm.classList.toggle('selected', v===val);
   }
 }
 
@@ -806,22 +822,9 @@ async function submitSurvey() {
   const getChips = (group) => [...document.querySelectorAll(`.chip[data-group="${group}"].selected`)].map(c => c.textContent.trim());
 
   const resumeFile = document.getElementById('q_resume').files[0];
-  let resumeData = null;
-
-  if (resumeFile) {
-    if (resumeFile.size > 2 * 1024 * 1024) {
-      alert('Resume file is too large. Please upload a file under 2MB.');
-      return;
-    }
-    resumeData = await new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve({
-        name: resumeFile.name,
-        type: resumeFile.type,
-        data: reader.result.split(',')[1]
-      });
-      reader.readAsDataURL(resumeFile);
-    });
+  if (resumeFile && resumeFile.size > 1 * 1024 * 1024) {
+    alert('Resume file is too large. Please upload a file under 1MB.');
+    return;
   }
 
   const payload = {
@@ -856,24 +859,27 @@ async function submitSurvey() {
       usefulness: document.getElementById('q_useful').value,
       ideal_role: document.getElementById('q_ideal').value,
     },
-    resume: resumeData,
+    resume: null,
     email: email || null,
   };
+
+  const formData = new FormData();
+  formData.append('data', JSON.stringify(payload));
+  if (resumeFile) formData.append('resume', resumeFile);
 
   try {
     const res = await fetch('https://recommender-survey.onrender.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: formData
     });
     const data = await res.json();
     if (data.status === 'success') {
       goTo(6);
     } else {
-      alert('Something went wrong. Please try again.');
+      alert('Error: ' + (data.message || 'Something went wrong. Please try again.'));
     }
   } catch(e) {
-    alert('Could not connect to server. Please try again.');
+    alert('Could not connect to server: ' + e.message);
   }
 }
 
