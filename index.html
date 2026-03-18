@@ -90,7 +90,7 @@
   .likert-table tbody td { padding: 10px 4px; text-align: center; vertical-align: middle; }
   .likert-table tbody td:first-child { text-align: left; color: var(--gray-700); padding-left: 0; line-height: 1.4; }
   .likert-table tbody tr:hover { background: var(--gray-50); }
-  .likert-radio { width: 20px; height: 20px; border: 2px solid var(--gray-300); border-radius: 50%; cursor: pointer; transition: all .15s; display: inline-block; position: relative; }
+  .likert-radio { width: 20px; height: 20px; border: 2px solid var(--gray-500); border-radius: 50%; cursor: pointer; transition: all .15s; display: inline-block; position: relative; background: var(--white); }
   .likert-radio:hover { border-color: var(--indigo); }
   .likert-radio.selected { background: var(--indigo); border-color: var(--indigo); }
   .likert-radio.selected::after { content: ''; width: 8px; height: 8px; background: #fff; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); }
@@ -106,6 +106,7 @@
   /* ── STEP VISIBILITY ── */
   .step { display: none; }
   .step.active { display: block; }
+  .step.active .chip { pointer-events: auto; cursor: pointer; }
 
   /* ── NAVIGATION ── */
   .nav { display: flex; gap: 12px; margin-top: 28px; }
@@ -483,10 +484,12 @@
     <div class="field">
       <label>Target Job / Opportunity Timeline <span class="req">*</span></label>
       <div class="chips">
-        <span class="chip" data-group="timeline" data-single="true">Summer 2025</span>
-        <span class="chip" data-group="timeline" data-single="true">Fall 2025</span>
-        <span class="chip" data-group="timeline" data-single="true">Spring 2026</span>
         <span class="chip" data-group="timeline" data-single="true">Summer 2026</span>
+        <span class="chip" data-group="timeline" data-single="true">Fall 2026</span>
+        <span class="chip" data-group="timeline" data-single="true">Spring 2027</span>
+        <span class="chip" data-group="timeline" data-single="true">Summer 2027</span>
+        <span class="chip" data-group="timeline" data-single="true">New Grad 2026</span>
+        <span class="chip" data-group="timeline" data-single="true">New Grad 2027</span>
         <span class="chip" data-group="timeline" data-single="true">Flexible</span>
       </div>
     </div>
@@ -524,6 +527,12 @@
 
     <hr class="divider"/>
 
+    <div class="field">
+      <label>Upload Resume <span style="color:var(--gray-400);font-weight:400">(optional — PDF or Word)</span></label>
+      <input type="file" id="q_resume" accept=".pdf,.doc,.docx" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;background:var(--gray-50);font-size:14px;color:var(--gray-800);cursor:pointer;" />
+    </div>
+
+    <hr class="divider"/>
     <div class="info-box" style="background:#fffbeb;border-left-color:#d97706">
       <strong>Want to receive the research findings?</strong><br>
       This survey is fully anonymous. If you'd like to be notified when the research results are published, you can optionally leave your email below. Your email is stored separately from your survey responses and will not be linked to your answers.
@@ -582,12 +591,12 @@ const SKILL_CATS = {
 };
 
 const LIKERT_STATEMENTS = [
-  "I want internships that help me learn skills I don't yet have",
+  "I want roles that help me learn skills I don't yet have",
   "Company brand / prestige matters more to me than exact role fit",
-  "Compensation is my top priority when choosing an internship",
+  "Compensation is my top priority when choosing a role",
   "Strong mentorship is more important to me than project scope",
-  "I prefer internships with publication or research output opportunities",
-  "I am actively seeking a return full-time offer from this internship",
+  "I prefer roles with publication or research output opportunities",
+  "I am actively seeking a return full-time offer from this opportunity",
   "Team diversity and inclusive culture are highly important to me",
   "I am comfortable with uncertainty at an early-stage startup"
 ];
@@ -788,7 +797,32 @@ async function submitSurvey() {
   const timeline = document.querySelectorAll('.chip[data-group="timeline"].selected').length;
   if (!timeline || !document.getElementById('q_useful').value) { showErr(5); return; }
 
+  const email = document.getElementById('q_email').value;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('Please enter a valid email address or leave it blank.');
+    return;
+  }
+
   const getChips = (group) => [...document.querySelectorAll(`.chip[data-group="${group}"].selected`)].map(c => c.textContent.trim());
+
+  const resumeFile = document.getElementById('q_resume').files[0];
+  let resumeData = null;
+
+  if (resumeFile) {
+    if (resumeFile.size > 2 * 1024 * 1024) {
+      alert('Resume file is too large. Please upload a file under 2MB.');
+      return;
+    }
+    resumeData = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve({
+        name: resumeFile.name,
+        type: resumeFile.type,
+        data: reader.result.split(',')[1]
+      });
+      reader.readAsDataURL(resumeFile);
+    });
+  }
 
   const payload = {
     submitted_at: new Date().toISOString(),
@@ -822,7 +856,8 @@ async function submitSurvey() {
       usefulness: document.getElementById('q_useful').value,
       ideal_role: document.getElementById('q_ideal').value,
     },
-    email: document.getElementById('q_email').value || null,
+    resume: resumeData,
+    email: email || null,
   };
 
   try {
