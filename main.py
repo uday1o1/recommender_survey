@@ -25,16 +25,24 @@ collection = db["responses"]
 
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
+ALLOWED_TYPES = [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+]
+
 @app.post("/submit")
 async def submit(data: str = Form(...), resume: UploadFile = File(None)):
     try:
         payload = json.loads(data)
         email = payload.pop("email", None)
 
-        if resume:
+        if resume and resume.filename:
+            if resume.content_type not in ALLOWED_TYPES:
+                return {"status": "error", "message": "Only PDF or Word files are accepted."}
             file_bytes = await resume.read()
             if len(file_bytes) > 1 * 1024 * 1024:
-                return {"status": "error", "message": "Resume too large, max 1MB"}
+                return {"status": "error", "message": "Resume too large, max 1MB."}
             filename = f"{uuid.uuid4()}_{resume.filename}"
             supabase.storage.from_("resumes").upload(
                 filename,
