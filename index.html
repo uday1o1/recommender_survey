@@ -547,8 +547,9 @@
 
     <div class="nav">
       <button class="btn btn-back" onclick="goTo(4)">← Back</button>
-      <button class="btn btn-submit" onclick="submitSurvey()">Submit Survey ✓</button>
+      <button class="btn btn-submit" id="submitBtn" onclick="submitSurvey()">Submit Survey ✓</button>
     </div>
+    <div id="submitStatus" style="display:none;text-align:center;margin-top:12px;font-size:13px;color:var(--gray-500)">Submitting your response, please wait...</div>
     <div class="error-msg" id="err5">Please complete the required fields (timeline and usefulness rating).</div>
   </div>
 
@@ -863,6 +864,13 @@ async function submitSurvey() {
     email: email || null,
   };
 
+  const submitBtn = document.getElementById('submitBtn');
+  const submitStatus = document.getElementById('submitStatus');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.style.opacity = '0.7';
+  submitStatus.style.display = 'block';
+
   const formData = new FormData();
   formData.append('data', JSON.stringify(payload));
   if (resumeFile) formData.append('resume', resumeFile);
@@ -876,9 +884,17 @@ async function submitSurvey() {
     if (data.status === 'success') {
       goTo(6);
     } else {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Survey ✓';
+      submitBtn.style.opacity = '1';
+      submitStatus.style.display = 'none';
       alert('Error: ' + (data.message || 'Something went wrong. Please try again.'));
     }
   } catch(e) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Survey ✓';
+    submitBtn.style.opacity = '1';
+    submitStatus.style.display = 'none';
     alert('Could not connect to server: ' + e.message);
   }
 }
