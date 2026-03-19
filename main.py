@@ -31,7 +31,7 @@ ALLOWED_TYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health():
     return {"status": "ok"}
 
