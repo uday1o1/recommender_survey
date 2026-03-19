@@ -31,6 +31,10 @@ ALLOWED_TYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 @app.post("/submit")
 async def submit(data: str = Form(...), resume: UploadFile = File(None)):
     try:
