@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Engineering & DBMS Skills Survey</title>
+<style>
+  :root {
+    --teal:#0d9488;--teal-dark:#0f766e;--teal-light:#f0fdfa;
+    --blue:#2563eb;--blue-light:#eff6ff;
+    --amber:#d97706;--amber-light:#fffbeb;
+    --green:#059669;--red:#dc2626;
+    --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+    --gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;--gray-700:#374151;--gray-800:#1f2937;
+    --white:#fff;--radius:12px;--shadow:0 4px 24px rgba(13,148,136,.10);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:linear-gradient(135deg,#042f2e,#134e4a,#0f3460);min-height:100vh;padding:24px 16px 60px;color:var(--gray-800);}
+
+  .site-header{text-align:center;margin-bottom:28px;}
+  .badge{display:inline-block;background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 14px;border-radius:99px;margin-bottom:10px;}
+  .site-header h1{color:#fff;font-size:clamp(18px,4vw,28px);font-weight:800;}
+  .site-header p{color:#99f6e4;font-size:13px;margin-top:4px;}
+
+  .progress-wrap{max-width:800px;margin:0 auto 20px;display:flex;align-items:center;gap:4px;}
+  .prog-step{display:flex;flex-direction:column;align-items:center;flex:1;}
+  .prog-circle{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all .3s;background:#134e4a;color:#5eead4;border:2px solid #0f766e;}
+  .prog-circle.active{background:var(--teal);color:#fff;border-color:#2dd4bf;box-shadow:0 0 0 4px rgba(13,148,136,.25);}
+  .prog-circle.done{background:var(--green);color:#fff;border-color:var(--green);}
+  .prog-label{font-size:10px;color:#5eead4;margin-top:4px;text-align:center;display:none;}
+  @media(min-width:500px){.prog-label{display:block;}}
+  .prog-line{flex:1;height:2px;background:#134e4a;margin-bottom:16px;transition:background .3s;}
+  .prog-line.done{background:var(--green);}
+
+  .card{background:var(--white);border-radius:20px;box-shadow:var(--shadow);max-width:800px;margin:0 auto;padding:clamp(20px,4vw,40px);}
+  .section-title{font-size:20px;font-weight:800;color:var(--gray-800);margin-bottom:4px;}
+  .section-sub{font-size:13px;color:var(--gray-500);margin-bottom:22px;line-height:1.5;}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px;}
+  .field label .req{color:var(--red);margin-left:2px;}
+  .field select,.field textarea,.field input[type=text]{width:100%;border:1.5px solid var(--gray-200);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--gray-800);background:var(--gray-50);transition:border .2s,box-shadow .2s;outline:none;}
+  .field select:focus,.field textarea:focus,.field input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+  .field textarea{resize:vertical;min-height:80px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:540px){.grid-2{grid-template-columns:1fr;}}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{padding:6px 13px;border-radius:99px;font-size:12px;font-weight:600;border:2px solid var(--gray-200);background:var(--white);color:var(--gray-600);cursor:pointer;transition:all .18s;user-select:none;}
+  .chip:hover{border-color:var(--teal);color:var(--teal);}
+  .chip.selected{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .chip.selected:hover{background:var(--teal-dark);}
+
+  .skill-cat-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+  .skill-tab{padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-200);background:var(--gray-50);color:var(--gray-600);cursor:pointer;transition:all .18s;}
+  .skill-tab.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .skill-panel{display:none;}
+  .skill-panel.active{display:block;}
+  .skill-row{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:8px;margin-bottom:5px;border:1.5px solid var(--gray-200);background:var(--gray-50);transition:all .18s;flex-wrap:wrap;gap:6px;}
+  .skill-row.selected{border-color:#99f6e4;background:var(--teal-light);}
+  .skill-name{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-700);cursor:pointer;flex:1;min-width:120px;}
+  .skill-checkbox{width:16px;height:16px;border:2px solid var(--gray-400);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+  .skill-checkbox.checked{background:var(--teal);border-color:var(--teal);}
+  .skill-checkbox.checked::after{content:'✓';color:#fff;font-size:10px;font-weight:700;}
+  .proficiency{display:flex;gap:3px;opacity:0;pointer-events:none;transition:opacity .18s;flex-wrap:wrap;}
+  .skill-row.selected .proficiency{opacity:1;pointer-events:auto;}
+  .prof-btn{padding:3px 7px;border-radius:5px;font-size:11px;font-weight:600;border:1.5px solid var(--gray-200);background:var(--white);color:var(--gray-500);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .prof-btn:hover{border-color:var(--teal);color:var(--teal);}
+  .prof-btn.p1.sel{background:#fef08a;border-color:#ca8a04;color:#713f12;}
+  .prof-btn.p2.sel{background:#bfdbfe;border-color:#2563eb;color:#1e40af;}
+  .prof-btn.p3.sel{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .prof-btn.p4.sel{background:#0f766e;border-color:#0f766e;color:#fff;}
+  .skill-counter{font-size:12px;color:var(--gray-400);margin-bottom:10px;}
+  .skill-counter span{font-weight:700;color:var(--teal);}
+
+  .likert-wrap{overflow-x:auto;}
+  .likert-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .likert-table thead th{padding:8px 4px;text-align:center;color:var(--gray-500);font-size:11px;font-weight:600;border-bottom:1.5px solid var(--gray-200);}
+  .likert-table thead th:first-child{text-align:left;width:52%;}
+  .likert-table tbody tr{border-bottom:1px solid var(--gray-100);}
+  .likert-table tbody tr:last-child{border-bottom:none;}
+  .likert-table tbody td{padding:9px 4px;text-align:center;vertical-align:middle;}
+  .likert-table tbody td:first-child{text-align:left;color:var(--gray-700);padding-left:0;line-height:1.4;}
+  .likert-table tbody tr:hover{background:var(--gray-50);}
+  .likert-radio{width:20px;height:20px;border:2px solid var(--gray-500);border-radius:50%;cursor:pointer;transition:all .15s;display:inline-block;position:relative;background:var(--white);}
+  .likert-radio:hover{border-color:var(--teal);}
+  .likert-radio.selected{background:var(--teal);border-color:var(--teal);}
+  .likert-radio.selected::after{content:'';width:8px;height:8px;background:#fff;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+
+  .step{display:none;}
+  .step.active{display:block;}
+  .step.active .chip{pointer-events:auto;cursor:pointer;}
+
+  @media(max-width:600px){
+    .likert-table thead{display:none;}
+    .likert-table,.likert-table tbody{display:block;}
+    .likert-table tr{display:block;margin-bottom:14px;border:1.5px solid var(--gray-200);border-radius:8px;padding:12px 10px;}
+    .likert-table td{display:none;}
+    .likert-table td:first-child{display:block;padding-bottom:10px;font-weight:600;color:var(--gray-700);}
+    .likert-table .likert-mobile-td{display:block !important;}
+    .likert-mobile-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+    .likert-mobile-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+    .likert-mobile-label{font-size:9px;color:var(--gray-500);font-weight:600;text-align:center;}
+  }
+
+  .nav{display:flex;gap:12px;margin-top:26px;}
+  .btn{flex:1;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+  .btn-back{background:var(--white);color:var(--gray-600);border:1.5px solid var(--gray-200);}
+  .btn-back:hover{background:var(--gray-100);}
+  .btn-next{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;box-shadow:0 4px 14px rgba(13,148,136,.3);}
+  .btn-next:hover{box-shadow:0 6px 20px rgba(13,148,136,.4);transform:translateY(-1px);}
+  .btn-submit{background:linear-gradient(90deg,var(--green),#10b981);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3);}
+  .btn-submit:hover{box-shadow:0 6px 20px rgba(5,150,105,.4);transform:translateY(-1px);}
+
+  .done-icon{font-size:54px;text-align:center;margin-bottom:12px;}
+  .done-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0;}
+  .done-stat{background:linear-gradient(135deg,var(--teal-light),#f0f9ff);border-radius:12px;padding:15px;text-align:center;border:1px solid #99f6e4;}
+  .done-stat .num{font-size:28px;font-weight:800;color:var(--teal);}
+  .done-stat .lbl{font-size:12px;font-weight:600;color:var(--gray-700);margin-top:2px;}
+  .done-stat .sub{font-size:11px;color:var(--gray-400);margin-top:2px;}
+  .methods-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+  @media(max-width:480px){.methods-grid{grid-template-columns:1fr;}}
+  .method-card{background:var(--gray-50);border-radius:8px;padding:10px 12px;border:1px solid var(--gray-200);font-size:12px;color:var(--gray-700);}
+  .method-card strong{color:var(--teal);display:block;margin-bottom:2px;font-size:13px;}
+
+  .info-box{background:linear-gradient(135deg,var(--teal-light),#f0f9ff);border-left:4px solid var(--teal);border-radius:8px;padding:14px 16px;font-size:13px;color:var(--gray-700);line-height:1.6;margin-bottom:20px;}
+  .intro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:12px;margin-bottom:24px;}
+  .intro-card{background:var(--gray-50);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--gray-200);}
+  .intro-card .ico{font-size:22px;margin-bottom:5px;}
+  .intro-card .ttl{font-size:12px;font-weight:700;color:var(--gray-800);}
+  .intro-card .dsc{font-size:11px;color:var(--gray-400);margin-top:2px;}
+  .error-msg{color:var(--red);font-size:12px;margin-top:6px;display:none;}
+  hr.divider{border:none;border-top:1.5px solid var(--gray-100);margin:18px 0;}
+
+  .cat-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+  .cat-db{background:#e0f2fe;color:#0369a1;}
+  .cat-de{background:#d1fae5;color:#065f46;}
+  .cat-cloud{background:#fef3c7;color:#92400e;}
+  .cat-prog{background:#ede9fe;color:#4c1d95;}
+  .cat-ml{background:#fce7f3;color:#9d174d;}
+  .cat-soft{background:#f1f5f9;color:#334155;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="badge">Data Careers Research</div>
+  <h1>DBMS &amp; Data Engineering Skills Survey</h1>
+  <p>Help us build better tools to match people with the right data opportunities</p>
+</header>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="prog-step"><div class="prog-circle active" id="pc0">1</div><div class="prog-label">Intro</div></div>
+  <div class="prog-line" id="pl0"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc1">2</div><div class="prog-label">Profile</div></div>
+  <div class="prog-line" id="pl1"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc2">3</div><div class="prog-label">Skills</div></div>
+  <div class="prog-line" id="pl2"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc3">4</div><div class="prog-label">Preferences</div></div>
+  <div class="prog-line" id="pl3"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc4">5</div><div class="prog-label">Experience</div></div>
+  <div class="prog-line" id="pl4"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc5">6</div><div class="prog-label">Context</div></div>
+  <div class="prog-line" id="pl5"></div>
+  <div class="prog-step"><div class="prog-circle" id="pc6">7</div><div class="prog-label">Done</div></div>
+</div>
+
+<div class="card">
+
+<!-- ══ STEP 0: INTRO ══════════════════════════════════════════════════════ -->
+<div class="step active" id="step0">
+  <div class="section-title">Welcome! 👋</div>
+  <div class="section-sub">DBMS and Data Engineering Job/Internship Recommender System</div>
+  
+  <div class="info-box" style="background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-left-color:#059669;margin-bottom:14px">
+      <strong style="color:#065f46">Why this matters:</strong>
+      <ul style="margin-top:8px;padding-left:18px;line-height:2">
+        <li>Finding the right DBMS role is hard — most people apply broadly and hear nothing back</li>
+        <li>Your responses help build a smarter matching system that connects people to roles that actually fit their skills and goals</li>
+        <li>The dataset powers research that could benefit the entire DBMS and related job-seeking community</li>
+        <li>Results from this research will be shared publicly</li>
+      </ul>
+    </div>
+  
+  <div class="info-box">
+    <strong>Goal:</strong> Build a dataset to design and evaluate a recommender system for Data Engineering &amp; DBMS job matching, powering a RecSys research project.<br><br>
+    <strong>What makes this unique:</strong> Your skill ratings create a <em>person × skill × opportunity</em> tripartite graph spanning databases, pipelines, cloud platforms, and analytics — enabling novel RS research in a high-demand career domain.<br><br>
+    <strong>Time:</strong> ~10 minutes &nbsp;|&nbsp; <strong>Privacy:</strong> Responses are fully anonymized. No personally identifiable information is collected unless you choose to provide your email at the end.
+  </div>
+  <div class="intro-grid">
+    <div class="intro-card"><div class="ico">👤</div><div class="ttl">Profile</div><div class="dsc">Academic background</div></div>
+    <div class="intro-card"><div class="ico">🗄️</div><div class="ttl">Skill Map</div><div class="dsc">DB, DE & cloud skills</div></div>
+    <div class="intro-card"><div class="ico">🎯</div><div class="ttl">Preferences</div><div class="dsc">Role & company signals</div></div>
+    <div class="intro-card"><div class="ico">📁</div><div class="ttl">Experience</div><div class="dsc">Past work & projects</div></div>
+    <div class="intro-card"><div class="ico">🌐</div><div class="ttl">Context</div><div class="dsc">Career goal signals</div></div>
+    <div class="intro-card"><div class="ico">📊</div><div class="ttl">Dataset</div><div class="dsc">Powers 7+ RS models</div></div>
+  </div>
+  <div class="nav" style="margin-top:0">
+    <button class="btn btn-next" onclick="goTo(1)">Start Survey →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 1: PROFILE ════════════════════════════════════════════════════ -->
+<div class="step" id="step1">
+  <div class="section-title">Section 1: Academic Profile</div>
+  <div class="section-sub">User-side attributes for content-based and hybrid filtering models.</div>
+  <div class="grid-2">
+    <div class="field">
+      <label>Academic Year <span class="req">*</span></label>
+      <select id="q_year"><option value="">Select…</option><option>Freshman</option><option>Sophomore</option><option>Junior</option><option>Senior</option><option>MS Year 1</option><option>MS Year 2</option><option>PhD Year 1–2</option><option>PhD Year 3+</option></select>
+    </div>
+    <div class="field">
+      <label>Degree Program <span class="req">*</span></label>
+      <select id="q_degree"><option value="">Select…</option><option>BS</option><option>MS</option><option>PhD</option><option>MEng</option><option>MBA+Tech</option></select>
+    </div>
+    <div class="field">
+      <label>Major <span class="req">*</span></label>
+      <select id="q_major"><option value="">Select…</option><option>Computer Science</option><option>Data Science</option><option>Management Information Systems</option><option>Electrical & Computer Engineering</option><option>General Engineering/ Engineering Management</option><option>Statistics / Math</option><option>Business Analytics</option><option>Bioinformatics</option><option>Economics</option><option>Other STEM</option><option>Non-STEM</option></select>
+    </div>
+    <div class="field">
+      <label>GPA Range <span class="req">*</span></label>
+      <select id="q_gpa"><option value="">Select…</option><option>< 3.0</option><option>3.0–3.4</option><option>3.5–3.7</option><option>3.8–4.0</option><option>Not Applicable</option></select>
+    </div>
+    <div class="field">
+      <label>Industry Experience <span class="req">*</span></label>
+      <select id="q_exp"><option value="">Select…</option><option>None</option><option>< 6 months</option><option>6–12 months</option><option>1–2 years</option><option>2+ years</option></select>
+    </div>
+    <div class="field">
+      <label>Career Goal (5 yr) <span class="req">*</span></label>
+      <select id="q_goal"><option value="">Select…</option><option>Data Engineer</option><option>Database Administrator / Architect</option><option>Big Data Analytics Engineer</option>Data Scientist<option>Data Platform Engineer</option><option>ML / AI Engineer</option><option>Solutions Architect (Cloud/DB)</option><option>Research Scientist (Database Systems)</option><option>Product Manager (Data)</option><option> IS/DBMS Consultant</option><option> Chief Data Officer</option><option>Undecided</option></select>
+    </div>
+  </div>
+  <div class="field">
+    <label>Relevant Coursework <span style="color:var(--gray-400);font-weight:400">(select all that apply)</span></label>
+    <div class="chips">
+      <span class="chip" data-group="courses">Database Management Systems</span>
+      <span class="chip" data-group="courses">Data Warehousing</span>
+      <span class="chip" data-group="courses">Big Data Systems</span>
+      <span class="chip" data-group="courses">Distributed Systems</span>
+      <span class="chip" data-group="courses">Cloud Computing</span>
+      <span class="chip" data-group="courses">Data Mining</span>
+      <span class="chip" data-group="courses">Machine Learning</span>
+      <span class="chip" data-group="courses">Operating Systems</span>
+      <span class="chip" data-group="courses">Algorithms</span>
+      <span class="chip" data-group="courses">Software Engineering</span>
+      <span class="chip" data-group="courses">Statistics</span>
+      <span class="chip" data-group="courses">NoSQL Systems</span>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="btn btn-back" onclick="goTo(0)">← Back</button>
+    <button class="btn btn-next" onclick="validateAndGo(1,2)">Next: Skills →</button>
+  </div>
+  <div class="error-msg" id="err1">Please fill in all required fields (marked with *).</div>
+</div>
+
+<!-- ══ STEP 2: SKILLS ═════════════════════════════════════════════════════ -->
+<div class="step" id="step2">
+  <div class="section-title">Section 2: Data Engineering &amp; DBMS Skill Map</div>
+  <div class="section-sub">Core item space of the dataset. Check skills you have, then rate your proficiency: 1 = Beginner · 2 = Intermediate · 3 = Advanced · 4 = Expert</div>
+  <div class="skill-counter">Selected: <span id="skillCount">0</span> skills &nbsp;|&nbsp; Rated: <span id="ratedCount">0</span> &nbsp;|&nbsp; Min. 3 required</div>
+  <div class="skill-cat-tabs" id="skillTabs"></div>
+  <div id="skillPanels"></div>
+  <div class="nav">
+    <button class="btn btn-back" onclick="goTo(1)">← Back</button>
+    <button class="btn btn-next" onclick="validateAndGo(2,3)">Next: Preferences →</button>
+  </div>
+  <div class="error-msg" id="err2">Please select and rate at least 3 skills.</div>
+</div>
+
+<!-- ══ STEP 3: PREFERENCES ════════════════════════════════════════════════ -->
+<div class="step" id="step3">
+  <div class="section-title">Section 3: Job &amp; Role Preferences</div>
+  <div class="section-sub">Explicit feedback signals for knowledge-based and hybrid recommender models.</div>
+
+  <div class="field">
+    <label>Target Roles <span class="req">*</span> <span style="color:var(--gray-400);font-weight:400">(up to 3)</span></label>
+    <div class="chips">
+      <span class="chip" data-group="roles" data-max="3">Data Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">Database Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">Analytics Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">Data Platform Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">Cloud Data Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">BI / Reporting Analyst</span>
+      <span class="chip" data-group="roles" data-max="3">Data Scientist</span>
+      <span class="chip" data-group="roles" data-max="3">ML Data Infrastructure Engineer</span>
+      <span class="chip" data-group="roles" data-max="3">Database Administrator</span>
+      <span class="chip" data-group="roles" data-max="3">Site Reliability / DataOps Engineer</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Preferred Company / Organization Types <span class="req">*</span></label>
+    <div class="chips">
+      <span class="chip" data-group="companies">Cloud Platform (AWS, GCP, Azure)</span>
+      <span class="chip" data-group="companies">Data Platform Startup (Databricks, Snowflake, dbt Labs)</span>
+      <span class="chip" data-group="companies">Big Tech (Google, Meta, Microsoft, Amazon)</span>
+      <span class="chip" data-group="companies">Database Vendor (Oracle, MongoDB, Cockroach)</span>
+      <span class="chip" data-group="companies">Financial Services / Fintech</span>
+      <span class="chip" data-group="companies">Healthcare / Biotech Data</span>
+      <span class="chip" data-group="companies">E-commerce / Retail Analytics</span>
+      <span class="chip" data-group="companies">Government / National Lab</span>
+      <span class="chip" data-group="companies">Consulting / Data Services</span>
+      <span class="chip" data-group="companies">Open to Any</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Work Style</label>
+      <div class="chips">
+        <span class="chip" data-group="workstyle">Remote</span>
+        <span class="chip" data-group="workstyle">Hybrid</span>
+        <span class="chip" data-group="workstyle">On-site</span>
+        <span class="chip" data-group="workstyle">Flexible</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Duration</label>
+      <div class="chips">
+        <span class="chip" data-group="duration">3 months</span>
+        <span class="chip" data-group="duration">4 months</span>
+        <span class="chip" data-group="duration">6 months</span>
+        <span class="chip" data-group="duration">Co-op (8–12 mo)</span>
+        <span class="chip" data-group="duration">Part-time</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Preferred Locations</label>
+    <div class="chips">
+      <span class="chip" data-group="location">Bay Area, CA</span>
+      <span class="chip" data-group="location">Seattle, WA</span>
+      <span class="chip" data-group="location">NYC, NY</span>
+      <span class="chip" data-group="location">Austin, TX</span>
+      <span class="chip" data-group="location">Boston, MA</span>
+      <span class="chip" data-group="location">Chicago, IL</span>
+      <span class="chip" data-group="location">London, UK</span>
+      <span class="chip" data-group="location">Toronto, Canada</span>
+      <span class="chip" data-group="location">Remote (US)</span>
+      <span class="chip" data-group="location">Open to Anywhere</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Which data stack are you most interested in working with?</label>
+    <div class="chips">
+      <span class="chip" data-group="stack">Modern Data Stack (dbt + Snowflake + Airflow)</span>
+      <span class="chip" data-group="stack">Lakehouse (Delta Lake / Apache Iceberg)</span>
+      <span class="chip" data-group="stack">Streaming (Kafka + Flink / Spark Streaming)</span>
+      <span class="chip" data-group="stack">Traditional RDBMS (Oracle / PostgreSQL)</span>
+      <span class="chip" data-group="stack">NoSQL / Document (MongoDB / Cassandra)</span>
+      <span class="chip" data-group="stack">Cloud-Native (BigQuery / Redshift / Synapse)</span>
+      <span class="chip" data-group="stack">Graph Databases (Neo4j / TigerGraph)</span>
+      <span class="chip" data-group="stack">Vector Databases (Pinecone / Weaviate)</span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-back" onclick="goTo(2)">← Back</button>
+    <button class="btn btn-next" onclick="validateAndGo(3,4)">Next: Experience →</button>
+  </div>
+  <div class="error-msg" id="err3">Please select at least one role and one company type.</div>
+</div>
+
+<!-- ══ STEP 4: EXPERIENCE ═════════════════════════════════════════════════ -->
+<div class="step" id="step4">
+  <div class="section-title">Section 4: Past Experience</div>
+  <div class="section-sub">Sequential signals for temporal and career-trajectory recommender models.</div>
+
+  <div class="field">
+    <label>Previous Internships / Roles</label>
+    <div class="chips">
+      <span class="chip" data-group="past">Data Engineering Internship</span>
+      <span class="chip" data-group="past">Software Engineering Internship</span>
+      <span class="chip" data-group="past">Data Science / Analytics Internship</span>
+      <span class="chip" data-group="past">Database Admin Role</span>
+      <span class="chip" data-group="past">Research Assistant (Data/DB)</span>
+      <span class="chip" data-group="past">BI / Reporting Role</span>
+      <span class="chip" data-group="past">Cloud / DevOps Internship</span>
+      <span class="chip" data-group="past">Open Source Contributor</span>
+      <span class="chip" data-group="past">Freelance Data Work</span>
+      <span class="chip" data-group="past">None yet</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Data Projects Built</label>
+    <div class="chips">
+      <span class="chip" data-group="projects">ETL / ELT Pipeline</span>
+      <span class="chip" data-group="projects">Data Warehouse / Mart Design</span>
+      <span class="chip" data-group="projects">Real-Time Streaming Pipeline</span>
+      <span class="chip" data-group="projects">Database Schema Design</span>
+      <span class="chip" data-group="projects">Query Optimization Project</span>
+      <span class="chip" data-group="projects">BI Dashboard (Tableau/Power BI)</span>
+      <span class="chip" data-group="projects">Data Lake / Lakehouse</span>
+      <span class="chip" data-group="projects">API + DB Backend</span>
+      <span class="chip" data-group="projects">ML Feature Store</span>
+      <span class="chip" data-group="projects">Data Quality / Observability Tool</span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="field">
+      <label>Certifications Held</label>
+      <div class="chips">
+        <span class="chip" data-group="certs">AWS Data Analytics</span>
+        <span class="chip" data-group="certs">GCP Professional Data Eng</span>
+        <span class="chip" data-group="certs">Azure Data Engineer</span>
+        <span class="chip" data-group="certs">Databricks Certified</span>
+        <span class="chip" data-group="certs">dbt Certified</span>
+        <span class="chip" data-group="certs">Oracle DB Certified</span>
+        <span class="chip" data-group="certs">Snowflake SnowPro</span>
+        <span class="chip" data-group="certs">None</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>How did you find your last opportunity?</label>
+      <div class="chips">
+        <span class="chip" data-group="source" data-single="true">LinkedIn</span>
+        <span class="chip" data-group="source" data-single="true">Company Website</span>
+        <span class="chip" data-group="source" data-single="true">Campus Recruiting</span>
+        <span class="chip" data-group="source" data-single="true">Referral</span>
+        <span class="chip" data-group="source" data-single="true">Cold Email</span>
+        <span class="chip" data-group="source" data-single="true">Professor / Advisor</span>
+        <span class="chip" data-group="source" data-single="true">Hackathon</span>
+        <span class="chip" data-group="source" data-single="true">N/A</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-back" onclick="goTo(3)">← Back</button>
+    <button class="btn btn-next" onclick="goTo(5)">Next: Context →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 5: CONTEXT ════════════════════════════════════════════════════ -->
+<div class="step" id="step5">
+  <div class="section-title">Section 5: Context &amp; Career Goals</div>
+  <div class="section-sub">Enables context-aware RS models. Rate 1 (Strongly Disagree) → 5 (Strongly Agree).</div>
+
+  <div class="likert-wrap">
+  <table class="likert-table">
+    <thead>
+      <tr>
+        <th>Statement</th>
+        <th>1<br><span style="font-weight:400;font-size:10px">Str. Disagree</span></th>
+        <th>2</th><th>3<br><span style="font-weight:400;font-size:10px">Neutral</span></th><th>4</th>
+        <th>5<br><span style="font-weight:400;font-size:10px">Str. Agree</span></th>
+      </tr>
+    </thead>
+    <tbody id="likertBody"></tbody>
+  </table>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="field">
+    <label>Target Timeline <span class="req">*</span></label>
+    <div class="chips">
+      <span class="chip" data-group="timeline" data-single="true">Summer 2026</span>
+      <span class="chip" data-group="timeline" data-single="true">Fall 2026</span>
+      <span class="chip" data-group="timeline" data-single="true">Spring 2027</span>
+      <span class="chip" data-group="timeline" data-single="true">Summer 2027</span>
+      <span class="chip" data-group="timeline" data-single="true">New Grad 2026</span>
+      <span class="chip" data-group="timeline" data-single="true">New Grad 2027</span>
+      <span class="chip" data-group="timeline" data-single="true">Flexible</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Which area of the data career path excites you most?</label>
+    <div class="chips">
+      <span class="chip" data-group="pathway" data-single="true">Data Pipeline & Orchestration</span>
+      <span class="chip" data-group="pathway" data-single="true">Database Design & Architecture</span>
+      <span class="chip" data-group="pathway" data-single="true">Real-Time & Streaming Systems</span>
+      <span class="chip" data-group="pathway" data-single="true">Cloud Data Infrastructure</span>
+      <span class="chip" data-group="pathway" data-single="true">Analytics & Business Intelligence</span>
+      <span class="chip" data-group="pathway" data-single="true">ML Platform & Feature Engineering</span>
+      <span class="chip" data-group="pathway" data-single="true">Data Governance & Quality</span>
+      <span class="chip" data-group="pathway" data-single="true">Still exploring</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Biggest barrier to finding a data internship?</label>
+    <div class="chips">
+      <span class="chip" data-group="barrier" data-single="true">SQL / query skills</span>
+      <span class="chip" data-group="barrier" data-single="true">No cloud experience</span>
+      <span class="chip" data-group="barrier" data-single="true">No real project portfolio</span>
+      <span class="chip" data-group="barrier" data-single="true">Too competitive</span>
+      <span class="chip" data-group="barrier" data-single="true">Lack of network</span>
+      <span class="chip" data-group="barrier" data-single="true">Visa / work auth</span>
+      <span class="chip" data-group="barrier" data-single="true">Unsure which roles fit me</span>
+      <span class="chip" data-group="barrier" data-single="true">GPA requirements</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>How useful would a data career recommender be for you? <span class="req">*</span></label>
+    <select id="q_useful">
+      <option value="">Select…</option>
+      <option>Extremely useful – I struggle to navigate the data career landscape</option>
+      <option>Very useful – I'd use it regularly</option>
+      <option>Somewhat useful – a nice addition to my search</option>
+      <option>Not very useful – I have good strategies already</option>
+      <option>Not useful at all</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Describe your ideal data role <span style="color:var(--gray-400);font-weight:400">(optional)</span></label>
+    <textarea id="q_ideal" placeholder="e.g. A role at a cloud-native data startup building real-time pipelines with Kafka and Spark, with hands-on mentorship from a senior data engineer…"></textarea>
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="field">
+    <label>Upload Resume <span style="color:var(--gray-400);font-weight:400">(optional — PDF or Word, max 1MB)</span></label>
+    <input type="file" id="q_resume" accept=".pdf,.doc,.docx" style="width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:8px;background:var(--gray-50);font-size:14px;color:var(--gray-800);cursor:pointer;" />
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="info-box" style="background:#fffbeb;border-left-color:#d97706">
+    <strong>Want to receive the research findings?</strong><br>
+    This survey is fully anonymous. If you'd like to be notified when the research results are published, you can optionally leave your email below. Your email is stored separately from your survey responses and will not be linked to your answers.
+  </div>
+  <div class="field">
+    <label>Email Address <span style="color:var(--gray-400);font-weight:400">(optional)</span></label>
+    <input type="text" id="q_email" placeholder="you@example.com" />
+  </div>
+
+  <hr class="divider"/>
+
+  <div class="info-box" style="background:#f0fdf4;border-left-color:#059669">
+    <strong>Bonus Points Opportunity 🎉</strong><br>
+    Enter your SJSU Student ID below to be marked as having completed this survey for bonus points. Your student ID is stored separately from your survey responses and will not be linked to your answers.
+  </div>
+  <div class="field">
+    <label>SJSU Student ID <span style="color:var(--gray-400);font-weight:400">(optional — for bonus points only)</span></label>
+    <input type="text" id="q_student_id" placeholder="e.g. 015123456" />
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-back" onclick="goTo(4)">← Back</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitSurvey()">Submit Survey ✓</button>
+  </div>
+  <div id="submitStatus" style="display:none;text-align:center;margin-top:12px;font-size:13px;color:var(--gray-500)">Submitting your response, please wait...</div>
+  <div class="error-msg" id="err5">Please select a timeline and usefulness rating.</div>
+</div>
+
+<!-- ══ STEP 6: DONE ════════════════════════════════════════════════════════ -->
+<div class="step" id="step6">
+  <div class="done-icon">🎓</div>
+  <div class="section-title" style="text-align:center">Submission Complete!</div>
+  <div class="section-sub" style="text-align:center">Your response contributes to a novel Data Engineering &amp; DBMS careers recommender systems dataset. Thank you for helping make data job matching better for everyone.</div>
+  <div class="done-grid">
+    <div class="done-stat"><div class="num" id="dn_profile">—</div><div class="lbl">Profile Attrs</div><div class="sub">User features</div></div>
+    <div class="done-stat"><div class="num" id="dn_skills">—</div><div class="lbl">Skills Mapped</div><div class="sub">Item interactions</div></div>
+    <div class="done-stat"><div class="num" id="dn_prefs">—</div><div class="lbl">Preferences</div><div class="sub">Explicit feedback</div></div>
+    <div class="done-stat"><div class="num" id="dn_ctx">—</div><div class="lbl">Context Signals</div><div class="sub">Situational features</div></div>
+  </div>
+  <div style="background:var(--gray-50);border-radius:12px;padding:16px;border:1px solid var(--gray-200)">
+    <div style="font-size:14px;font-weight:700;color:var(--gray-800);margin-bottom:12px">🔬 RS Techniques Enabled by Your Data</div>
+    <div class="methods-grid">
+      <div class="method-card"><strong>🤝 Collaborative Filtering</strong>Skill & preference similarity across students</div>
+      <div class="method-card"><strong>📄 Content-Based Filtering</strong>Profile + skill vector matching to job descriptions</div>
+      <div class="method-card"><strong>🌐 Graph Neural Networks</strong>Student–Skill–Company tripartite graph</div>
+      <div class="method-card"><strong>🧠 LLM-Based RS</strong>Semantic embeddings of skills + job postings</div>
+      <div class="method-card"><strong>📍 Context-Aware RS</strong>Career pathway & situational Likert signals</div>
+      <div class="method-card"><strong>⏱ Sequential RS</strong>Career trajectory & certification progression</div>
+      <div class="method-card"><strong>❄️ Cold-Start Research</strong>Students with sparse skill histories</div>
+      <div class="method-card"><strong>🔁 Hybrid Models</strong>Fusion of all approaches above</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /card -->
+
+<script>
+const SKILL_CATS = {
+  "Databases & SQL": [
+    "SQL (basics — SELECT, JOIN, WHERE)",
+    "Advanced SQL (window functions, CTEs, subqueries)",
+    "Query optimization & execution plans",
+    "Relational schema design & normalization",
+    "Stored procedures & triggers",
+    "Transactions & ACID properties",
+    "Indexing strategies (B-tree, Hash, Bitmap)",
+    "PostgreSQL","MySQL / DB2","Oracle DB","Microsoft SQL Server","SQLite"
+  ],
+  "NoSQL Systems": [
+    "MongoDB (document store)",
+    "Apache Cassandra (wide-column)",
+    "Redis (key-value / caching)",
+    "DynamoDB (AWS managed NoSQL)",
+    "HBase (Hadoop-based)",
+    "Neo4j (graph database)",
+    "Elasticsearch (search & analytics)",
+    "Firebase / Firestore",
+    "CouchDB","InfluxDB (time-series)"
+  ],
+  "Data Engineering": [
+    "ETL / ELT pipeline design",
+    "Apache Airflow (workflow orchestration)",
+    "dbt (data build tool)",
+    "Apache Spark (batch processing)",
+    "Apache Kafka (event streaming)",
+    "Apache Flink (stream processing)",
+    "Apache Beam","Luigi","Prefect","Dagster"
+  ],
+  "Data Warehousing": [
+    "Data warehouse concepts (star / snowflake schema)",
+    "Snowflake","Google BigQuery","Amazon Redshift","Azure Synapse Analytics",
+    "Apache Hive","Teradata",
+    "Dimensional modeling (Kimball methodology)",
+    "Data marts & data lakes",
+    "Delta Lake / Apache Iceberg (lakehouse)"
+  ],
+  "Cloud Platforms": [
+    "AWS (S3, RDS, Glue, Athena, EMR)",
+    "Google Cloud (BigQuery, Dataflow, Pub/Sub)",
+    "Azure (Data Factory, Blob Storage, Databricks)",
+    "Databricks","Docker (for data services)","Kubernetes (data workloads)",
+    "Terraform (infra as code)","CI/CD for data pipelines",
+    "Serverless data functions","Data mesh architecture"
+  ],
+  "Programming": [
+    "Python (pandas, NumPy)","Python (PySpark)","SQL scripting",
+    "Scala (Spark)","Java (Hadoop ecosystem)",
+    "R (data manipulation)","Bash / Shell scripting",
+    "YAML / JSON config","REST APIs for data ingestion","GraphQL"
+  ],
+  "Analytics & BI": [
+    "Tableau","Power BI","Looker / Looker Studio",
+    "Apache Superset","Metabase",
+    "A/B testing & experimentation","Statistical analysis",
+    "Data storytelling","Excel / Google Sheets (advanced)","Python (matplotlib / seaborn / plotly)"
+  ],
+  "Data Quality & Governance": [
+    "Data quality frameworks (Great Expectations, Soda)","Data lineage & cataloging",
+    "Apache Atlas","Collibra","dbt tests",
+    "Data observability (Monte Carlo, Bigeye)","GDPR / data privacy compliance",
+    "Master data management","Data contracts","Schema registry (Confluent)"
+  ]
+};
+
+const LIKERT_STMTS = [
+  "I want internships that expose me to technologies I haven't used before",
+  "Working with large-scale production data systems is more appealing than small-scale projects",
+  "I prefer roles where I build pipelines rather than analyze data",
+  "Cloud certifications (AWS, GCP, Azure) are important for my career development",
+  "I value companies with a strong open-source data tooling culture",
+  "Compensation is my top priority when choosing between internship offers",
+  "I am interested in the intersection of data engineering and ML / AI systems",
+  "Data governance and compliance work is appealing to me"
+];
+
+let skillState = {};
+let likertState = {};
+let currentStep = 0;
+const TOTAL = 7;
+
+function buildSkills() {
+  const tabs = document.getElementById('skillTabs');
+  const panels = document.getElementById('skillPanels');
+  Object.entries(SKILL_CATS).forEach(([cat, skills], ci) => {
+    const tab = document.createElement('button');
+    tab.className = 'skill-tab' + (ci===0?' active':'');
+    tab.textContent = cat;
+    tab.onclick = () => switchCat(cat);
+    tab.dataset.cat = cat;
+    tabs.appendChild(tab);
+
+    const panel = document.createElement('div');
+    panel.className = 'skill-panel' + (ci===0?' active':'');
+    panel.dataset.cat = cat;
+
+    skills.forEach(skill => {
+      const sid = 'sk_' + skill.replace(/[^a-zA-Z0-9]/g,'_');
+      const row = document.createElement('div');
+      row.className = 'skill-row';
+      row.id = 'row_' + sid;
+      row.innerHTML = `
+        <div class="skill-name" onclick="toggleSkill('${skill.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${sid}')">
+          <div class="skill-checkbox" id="cb_${sid}"></div>
+          ${skill}
+        </div>
+        <div class="proficiency">
+          <button class="prof-btn p1" onclick="setProf('${skill.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${sid}',1,this)">Beginner</button>
+          <button class="prof-btn p2" onclick="setProf('${skill.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${sid}',2,this)">Intermediate</button>
+          <button class="prof-btn p3" onclick="setProf('${skill.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${sid}',3,this)">Advanced</button>
+          <button class="prof-btn p4" onclick="setProf('${skill.replace(/'/g,"\\'").replace(/"/g,'&quot;')}','${sid}',4,this)">Expert</button>
+        </div>`;
+      panel.appendChild(row);
+    });
+    panels.appendChild(panel);
+  });
+}
+
+function buildLikert() {
+  const tbody = document.getElementById('likertBody');
+  const labels = ['Str. Disagree', '2', 'Neutral', '4', 'Str. Agree'];
+  LIKERT_STMTS.forEach((stmt, i) => {
+    const tr = document.createElement('tr');
+    let cells = `<td>${stmt}</td>`;
+    for (let v=1;v<=5;v++) cells += `<td><div class="likert-radio" id="lr_${i}_${v}" onclick="setLikert(${i},${v})"></div></td>`;
+    let mobileRow = `<td colspan="5" style="display:none" class="likert-mobile-td"><div class="likert-mobile-row">`;
+    for (let v=1;v<=5;v++) {
+      mobileRow += `<div class="likert-mobile-item"><div class="likert-radio" id="lrm_${i}_${v}" onclick="setLikert(${i},${v})"></div><div class="likert-mobile-label">${labels[v-1]}</div></div>`;
+    }
+    mobileRow += `</div></td>`;
+    tr.innerHTML = cells + mobileRow;
+    tbody.appendChild(tr);
+  });
+}
+
+function setLikert(row, val) {
+  likertState[row] = val;
+  for (let v=1;v<=5;v++) {
+    const el = document.getElementById(`lr_${row}_${v}`);
+    const elm = document.getElementById(`lrm_${row}_${v}`);
+    if (el) el.classList.toggle('selected', v===val);
+    if (elm) elm.classList.toggle('selected', v===val);
+  }
+}
+
+function toggleSkill(skill, sid) {
+  const row = document.getElementById('row_'+sid);
+  const cb = document.getElementById('cb_'+sid);
+  if (!row||!cb) return;
+  const checked = cb.classList.contains('checked');
+  if (checked) { cb.classList.remove('checked'); row.classList.remove('selected'); delete skillState[skill]; }
+  else { cb.classList.add('checked'); row.classList.add('selected'); skillState[skill] = 0; }
+  updateSkillCounter();
+}
+
+function setProf(skill, sid, level, btn) {
+  skillState[skill] = level;
+  const row = document.getElementById('row_'+sid);
+  if (row) row.querySelectorAll('.prof-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  updateSkillCounter();
+}
+
+function updateSkillCounter() {
+  document.getElementById('skillCount').textContent = Object.keys(skillState).length;
+  document.getElementById('ratedCount').textContent = Object.values(skillState).filter(v=>v>0).length;
+}
+
+function setLikert(row, val) {
+  likertState[row] = val;
+  for (let v=1;v<=5;v++) {
+    const el = document.getElementById(`lr_${row}_${v}`);
+    if (el) el.classList.toggle('selected', v===val);
+  }
+}
+
+document.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const group = chip.dataset.group;
+  const isSingle = chip.dataset.single==='true';
+  const max = chip.dataset.max ? parseInt(chip.dataset.max) : Infinity;
+  if (isSingle) {
+    document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c=>c.classList.remove('selected'));
+    chip.classList.add('selected');
+  } else {
+    const already = chip.classList.contains('selected');
+    const sel = document.querySelectorAll(`.chip[data-group="${group}"].selected`).length;
+    if (!already && sel >= max) return;
+    chip.classList.toggle('selected');
+  }
+});
+
+function goTo(n) {
+  document.getElementById('step'+currentStep).classList.remove('active');
+  document.getElementById('step'+n).classList.add('active');
+  for (let i=0;i<TOTAL;i++) {
+    const el = document.getElementById('pc'+i);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    if (i<n) { el.classList.add('done'); el.textContent='✓'; }
+    else if (i===n) { el.classList.add('active'); el.textContent=i+1; }
+    else el.textContent=i+1;
+    const line = document.getElementById('pl'+i);
+    if (line) line.classList.toggle('done', i<n);
+  }
+  currentStep = n;
+  window.scrollTo({top:0,behavior:'smooth'});
+  if (n===6) buildDone();
+}
+
+function validateAndGo(from, to) {
+  hideErr(from);
+  if (from===1) {
+    const req = ['q_year','q_degree','q_major','q_gpa','q_exp','q_goal'];
+    if (req.some(id=>!document.getElementById(id).value)) { showErr(1); return; }
+  }
+  if (from===2) {
+    if (Object.keys(skillState).length < 3) { showErr(2); return; }
+  }
+  if (from===3) {
+    const r = document.querySelectorAll('.chip[data-group="roles"].selected').length;
+    const c = document.querySelectorAll('.chip[data-group="companies"].selected').length;
+    if (!r||!c) { showErr(3); return; }
+  }
+  if (from===5) {
+    const t = document.querySelectorAll('.chip[data-group="timeline"].selected').length;
+    if (!t||!document.getElementById('q_useful').value) { showErr(5); return; }
+  }
+  goTo(to);
+}
+
+function showErr(n) { const e=document.getElementById('err'+n); if(e) e.style.display='block'; }
+function hideErr(n) { const e=document.getElementById('err'+n); if(e) e.style.display='none'; }
+
+function buildDone() {
+  const p = ['q_year','q_degree','q_major','q_gpa','q_exp','q_goal'].filter(id=>document.getElementById(id)?.value).length
+    + document.querySelectorAll('.chip[data-group="courses"].selected').length;
+  const s = Object.keys(skillState).length;
+  const pref = ['roles','companies','workstyle','duration','location','stack']
+    .reduce((sum,g)=>sum+document.querySelectorAll(`.chip[data-group="${g}"].selected`).length,0);
+  const ctx = Object.keys(likertState).length
+    + (document.querySelectorAll('.chip[data-group="timeline"].selected').length?1:0)
+    + (document.querySelectorAll('.chip[data-group="pathway"].selected').length?1:0)
+    + (document.querySelectorAll('.chip[data-group="barrier"].selected').length?1:0);
+  document.getElementById('dn_profile').textContent = p;
+  document.getElementById('dn_skills').textContent = s;
+  document.getElementById('dn_prefs').textContent = pref;
+  document.getElementById('dn_ctx').textContent = ctx;
+}
+
+buildSkills();
+buildLikert();
+
+async function submitSurvey() {
+  hideErr(5);
+  const timeline = document.querySelectorAll('.chip[data-group="timeline"].selected').length;
+  if (!timeline || !document.getElementById('q_useful').value) { showErr(5); return; }
+
+  const email = document.getElementById('q_email').value;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    alert('Please enter a valid email address or leave it blank.');
+    return;
+  }
+
+  const resumeFile = document.getElementById('q_resume').files[0];
+  if (resumeFile && resumeFile.size > 1 * 1024 * 1024) {
+    alert('Resume file is too large. Please upload a file under 1MB.');
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  const submitStatus = document.getElementById('submitStatus');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.style.opacity = '0.7';
+  submitStatus.style.display = 'block';
+
+  const getChips = (group) => [...document.querySelectorAll(`.chip[data-group="${group}"].selected`)].map(c => c.textContent.trim());
+
+  const payload = {
+    submitted_at: new Date().toISOString(),
+    form_type: 'dbms',
+    profile: {
+      academic_year: document.getElementById('q_year').value,
+      degree: document.getElementById('q_degree').value,
+      major: document.getElementById('q_major').value,
+      gpa: document.getElementById('q_gpa').value,
+      industry_experience: document.getElementById('q_exp').value,
+      career_goal: document.getElementById('q_goal').value,
+      coursework: getChips('courses'),
+    },
+    skills: skillState,
+    preferences: {
+      roles: getChips('roles'),
+      companies: getChips('companies'),
+      work_style: getChips('workstyle'),
+      duration: getChips('duration'),
+      locations: getChips('location'),
+      data_stack: getChips('stack'),
+    },
+    experience: {
+      past_roles: getChips('past'),
+      projects: getChips('projects'),
+      certifications: getChips('certs'),
+      opportunity_source: getChips('source')[0] || null,
+    },
+    context: {
+      likert: likertState,
+      timeline: getChips('timeline')[0] || null,
+      pathway: getChips('pathway')[0] || null,
+      barrier: getChips('barrier')[0] || null,
+      usefulness: document.getElementById('q_useful').value,
+      ideal_role: document.getElementById('q_ideal').value,
+    },
+    email: email || null,
+    student_id: document.getElementById('q_student_id').value || null,
+  };
+
+  const formData = new FormData();
+  formData.append('data', JSON.stringify(payload));
+  if (resumeFile) formData.append('resume', resumeFile);
+
+  try {
+    const res = await fetch('https://recommender-survey.onrender.com/submit-dbms', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+      goTo(6);
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Survey ✓';
+      submitBtn.style.opacity = '1';
+      submitStatus.style.display = 'none';
+      alert('Error: ' + (data.message || 'Something went wrong. Please try again.'));
+    }
+  } catch(e) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Survey ✓';
+    submitBtn.style.opacity = '1';
+    submitStatus.style.display = 'none';
+    alert('Could not connect to server: ' + e.message);
+  }
+}
+</script>
+</body>
+</html>
