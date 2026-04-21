@@ -8,10 +8,8 @@ import os
 import json
 import uuid
 import smtplib
-import io
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import openpyxl
 
 load_dotenv()
 
@@ -38,35 +36,6 @@ ALLOWED_TYPES = [
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]
-
-XLSX_BUCKET = "resumes"
-XLSX_PATH = "dbms_class/DBMS_Form_Responses.xlsx"
-
-
-def mark_student_completed(student_id: str):
-    try:
-        # Download xlsx from Supabase
-        res = supabase.storage.from_(XLSX_BUCKET).download(XLSX_PATH)
-        wb = openpyxl.load_workbook(io.BytesIO(res))
-        ws = wb.active
-
-        # Find header row and add "Survey Completed" column if not there
-        headers = [cell.value for cell in ws[1]]
-        if "Survey Completed" not in headers:
-            completed_col = len(headers) + 1
-            ws.cell(row=1, column=completed_col, value="Survey Completed")
-        else:
-            completed_col = headers.index("Survey Completed") + 1
-
-        # SIS Id is column 5
-        sis_col = 5
-        matched = False
-        for row in ws.iter_rows(min_row=2):
-            cell_val = row[sis_col - 1].value
-            if cell_val and str(int(float(str(cell_val)))).lstrip('0') == str(student_id).strip().lstrip('0'):
-                ws.cell(row=row[0].row, column=completed_col, value=1)
-                matched = True
-                break
 
         if matched:
             # Upload updated xlsx back to Supabase
@@ -226,7 +195,6 @@ async def submit_dbms(data: str = Form(...), resume: UploadFile = File(None)):
                 "student_id": str(student_id).strip(),
                 "submitted_at": payload.get("submitted_at")
             })
-            mark_student_completed(student_id)
 
         send_notification(payload, resume_url, form_type="dbms")
         return {"status": "success"}
