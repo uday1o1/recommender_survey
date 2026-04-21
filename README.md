@@ -121,8 +121,6 @@ Then open `index.html` or `dbms.html` in your browser.
 
 **Frontend (Netlify):**
 - Connected to GitHub repo, auto-deploys on push to main
-- AI/ML survey: `recommender-survey.netlify.app`
-- DBMS survey: `recommender-survey.netlify.app/dbms.html`
 
 ---
 

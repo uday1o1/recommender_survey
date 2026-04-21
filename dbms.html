@@ -74,6 +74,7 @@
   .skill-counter span{font-weight:700;color:var(--teal);}
 
   .likert-wrap{overflow-x:auto;}
+  @media(max-width:600px){.likert-wrap{overflow-x:visible;}}
   .likert-table{width:100%;border-collapse:collapse;font-size:13px;}
   .likert-table thead th{padding:8px 4px;text-align:center;color:var(--gray-500);font-size:11px;font-weight:600;border-bottom:1.5px solid var(--gray-200);}
   .likert-table thead th:first-child{text-align:left;width:52%;}
@@ -727,6 +728,11 @@ function setLikert(row, val) {
     if (el) el.classList.toggle('selected', v===val);
     if (elm) elm.classList.toggle('selected', v===val);
   }
+}
+
+function switchCat(cat) {
+  document.querySelectorAll('.skill-tab').forEach(t => t.classList.toggle('active', t.dataset.cat===cat));
+  document.querySelectorAll('.skill-panel').forEach(p => p.classList.toggle('active', p.dataset.cat===cat));
 }
 
 function toggleSkill(skill, sid) {
