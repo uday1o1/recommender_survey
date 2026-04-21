@@ -63,7 +63,7 @@ def mark_student_completed(student_id: str):
         matched = False
         for row in ws.iter_rows(min_row=2):
             cell_val = row[sis_col - 1].value
-            if cell_val and str(int(float(str(cell_val)))) == str(student_id).strip():
+            if cell_val and str(int(float(str(cell_val)))).lstrip('0') == str(student_id).strip().lstrip('0'):
                 ws.cell(row=row[0].row, column=completed_col, value=1)
                 matched = True
                 break
