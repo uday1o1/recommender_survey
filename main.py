@@ -37,21 +37,6 @@ ALLOWED_TYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]
 
-        if matched:
-            # Upload updated xlsx back to Supabase
-            output = io.BytesIO()
-            wb.save(output)
-            output.seek(0)
-            supabase.storage.from_(XLSX_BUCKET).update(
-                XLSX_PATH,
-                output.read(),
-                {"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
-            )
-        return matched
-    except Exception as e:
-        print(f"Student ID matching failed: {e}")
-        return False
-
 
 def send_notification(payload, resume_url, form_type="ai"):
     try:
@@ -136,7 +121,7 @@ async def submit(data: str = Form(...), resume: UploadFile = File(None)):
             if len(file_bytes) > 1 * 1024 * 1024:
                 return {"status": "error", "message": "Resume too large, max 1MB."}
             filename = f"{uuid.uuid4()}_{resume.filename}"
-            supabase.storage.from_(XLSX_BUCKET).upload(
+            supabase.storage.from_("resumes").upload(
                 filename,
                 file_bytes,
                 {"content-type": resume.content_type}
@@ -174,7 +159,7 @@ async def submit_dbms(data: str = Form(...), resume: UploadFile = File(None)):
             if len(file_bytes) > 1 * 1024 * 1024:
                 return {"status": "error", "message": "Resume too large, max 1MB."}
             filename = f"dbms-resumes/{uuid.uuid4()}_{resume.filename}"
-            supabase.storage.from_(XLSX_BUCKET).upload(
+            supabase.storage.from_("resumes").upload(
                 filename,
                 file_bytes,
                 {"content-type": resume.content_type}
