@@ -10,6 +10,8 @@ import uuid
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import gspread
+from google.oauth2.service_account import Credentials
 
 load_dotenv()
 
@@ -36,6 +38,22 @@ ALLOWED_TYPES = [
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]
+
+
+def update_google_sheet(student_id: str, submitted_at: str):
+    try:
+        creds_json = json.loads(os.getenv("GOOGLE_CREDENTIALS_JSON"))
+        creds = Credentials.from_service_account_info(
+            creds_json,
+            scopes=["https://www.googleapis.com/auth/spreadsheets"]
+        )
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key(os.getenv("GOOGLE_SHEET_ID"))
+        ws = sh.sheet1
+        ws.append_row([student_id, submitted_at])
+        print(f"Added student ID {student_id} to Google Sheet")
+    except Exception as e:
+        print(f"Google Sheets update failed: {e}")
 
 
 def send_notification(payload, resume_url, form_type="ai"):
@@ -180,6 +198,7 @@ async def submit_dbms(data: str = Form(...), resume: UploadFile = File(None)):
                 "student_id": str(student_id).strip(),
                 "submitted_at": payload.get("submitted_at")
             })
+            update_google_sheet(str(student_id).strip(), payload.get("submitted_at", ""))
 
         send_notification(payload, resume_url, form_type="dbms")
         return {"status": "success"}
